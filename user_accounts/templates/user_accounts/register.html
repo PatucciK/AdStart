@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация | AdStart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #007eff;
+            margin-bottom: 20px;
+        }
+        .role-selection button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .webmaster-button {
+            background-color: #88b5ff;
+            color: #fff;
+        }
+        .webmaster-button:hover{
+            background-color: #4589e3;
+            color: #fff;
+        }
+        .advertiser-button {
+            background-color: rgba(151, 224, 42, 0.78);
+            color: #fff;
+        }
+
+        .advertiser-button:hover {
+            background-color: rgba(93, 243, 51, 0.78);
+            color: #fff;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация в AdStart</h1>
+        <div class="role-selection">
+            <form method="get" action="{% url 'register_webmaster' %}">
+                <button type="submit" class="webmaster-button">Я - Вебмастер</button>
+            </form>
+            <form method="get" action="{% url 'register_advertiser' %}">
+                <button type="submit" class="advertiser-button">Я - Рекламодатель</button>
+            </form>
+        </div>
+        <div class="footer">
+            &copy; 2024 AdStart. Все права защищены.
+        </div>
+    </div>
+</body>
+</html>

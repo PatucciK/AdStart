@@ -1,5 +1,9 @@
+from datetime import timedelta
+from django.utils import timezone
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 
 class CustomAdminUser(AbstractUser):
     ROLES = [
@@ -52,6 +56,7 @@ class CustomAdminUser(AbstractUser):
         verbose_name = 'Административный пользователь'
         verbose_name_plural = 'Административные пользователи'
 
+
 class Advertiser(models.Model):
     email = models.EmailField(
         unique=True,
@@ -72,10 +77,18 @@ class Advertiser(models.Model):
         verbose_name='Телефон',
         help_text='Телефон рекламодателя'
     )
+    password = models.CharField(
+        max_length=128,
+        verbose_name="Пароль"
+    )
+
+    def __str__(self):
+        return self.email
 
     class Meta:
         verbose_name = 'Рекламодатель'
         verbose_name_plural = 'Рекламодатели'
+
 
 class Webmaster(models.Model):
     email = models.EmailField(
@@ -110,7 +123,31 @@ class Webmaster(models.Model):
         verbose_name='Скриншот статистики',
         help_text='Скриншот статистики вебмастера'
     )
+    password = models.CharField(
+        max_length=128,
+        verbose_name="Пароль"
+    )
+
+    def __str__(self):
+        return self.email
 
     class Meta:
         verbose_name = 'Вебмастер'
         verbose_name_plural = 'Вебмастера'
+
+
+class EmailConfirmation(models.Model):
+    email = models.EmailField(unique=True, verbose_name="Email")
+    confirmation_code = models.CharField(max_length=6, verbose_name="Код подтверждения")
+    is_confirmed = models.BooleanField(default=False, verbose_name="Подтверждено")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    def is_expired(self):
+        # Определите срок действия кода (например, 10 минут)
+        expiration_time = self.updated_at + timedelta(minutes=10)
+        return timezone.now() > expiration_time
+
+
+    def __str__(self):
+        return self.email
