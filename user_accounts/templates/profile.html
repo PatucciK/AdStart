@@ -1,0 +1,75 @@
+<!-- templates/profile.html -->
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9 offset-md-3">
+        <div class="card mb-3 small-card">
+            <div class="card-header text-center">
+                <h5>Информация о пользователе</h5>
+            </div>
+            <div class="card-body text-center">
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+            </div>
+        </div>
+        {% if advertiser_profile %}
+            <div class="card mb-3 small-card">
+                <div class="card-header text-center">
+                    <h5>Информация рекламодателя</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Telegram:</strong> {{ advertiser_profile.telegram }}</p>
+                    <p><strong>Телефон:</strong> {{ advertiser_profile.phone }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if webmaster_profile %}
+            <div class="card mb-3 small-card">
+                <div class="card-header text-center">
+                    <h5>Информация вебмастера</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Telegram:</strong> {{ webmaster_profile.telegram }}</p>
+                    <p><strong>Телефон:</strong> {{ webmaster_profile.phone }}</p>
+                    <p><strong>Опыт:</strong> {{ webmaster_profile.experience }}</p>
+                    {% if webmaster_profile.stats_screenshot %}
+                        <p><strong>Скриншот статистики:</strong></p>
+                        <img src="{{ webmaster_profile.stats_screenshot.url }}" alt="Скриншот статистики" class="img-fluid">
+                    {% endif %}
+                    <p>
+                        <strong>Подтвержден администратором:</strong>
+                        {% if webmaster_profile.is_approved %}
+                            <span class="text-success">&#10004;</span>
+                        {% else %}
+                            <span class="text-danger">&#10008;</span>
+                        {% endif %}
+                    </p>
+                    {% if not webmaster_profile.is_approved %}
+                        <div class="alert alert-info" role="alert">
+                            Ваша заявка на подключение еще находится на стадии рассмотрения. Пожалуйста, дождитесь уведомления на почту.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if not advertiser_profile and not webmaster_profile %}
+            <div class="card mb-3 small-card text-center">
+                <div class="card-header">
+                    <h5>Выберите свою роль</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'complete_advertiser_profile' %}" class="btn btn-primary btn-lg btn-block custom-btn mt-3">
+                        <i class="fas fa-bullhorn"></i> Я рекламодатель
+                    </a>
+                    <a href="{% url 'complete_webmaster_profile' %}" class="btn btn-success btn-lg btn-block custom-btn mt-3">
+                        <i class="fas fa-laptop-code"></i> Я вебмастер
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

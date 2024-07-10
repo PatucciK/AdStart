@@ -1,12 +1,16 @@
+# user_accounts/views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model, logout
 from .forms import UserRegistrationForm, EmailConfirmationForm, AdvertiserProfileForm, WebmasterProfileForm
-from .models import EmailConfirmation
+from .models import EmailConfirmation, Advertiser, Webmaster
 import random
 import string
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
+
+User = get_user_model()
 
 def register(request):
     if request.method == 'POST':
@@ -27,18 +31,28 @@ def register(request):
                 confirmation.save()
             except EmailConfirmation.DoesNotExist:
                 EmailConfirmation.objects.create(email=email, confirmation_code=confirmation_code)
-            # Отправка кода на почту (упрощенно)
-            print(f"Код подтверждения для {email}: {confirmation_code}")
+            # Отправка кода на почту
+            send_mail(
+                'Ваш код подтверждения',
+                f'Ваш код подтверждения: {confirmation_code}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+            request.session['email'] = email
             return redirect('email_confirmation')
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
 def email_confirmation(request):
+    email = request.session.get('email')
+    if not email:
+        return redirect('register')
+
     if request.method == 'POST':
         form = EmailConfirmationForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
             code = form.cleaned_data['confirmation_code']
             try:
                 confirmation = EmailConfirmation.objects.get(email=email, confirmation_code=code)
@@ -57,10 +71,12 @@ def email_confirmation(request):
                 form.add_error(None, 'Неверный код подтверждения.')
     else:
         form = EmailConfirmationForm()
-    return render(request, 'email_confirmation.html', {'form': form})
+    return render(request, 'email_confirmation.html', {'form': form, 'email': email})
 
 @login_required
 def choose_role(request):
+    if Advertiser.objects.filter(user=request.user).exists() or Webmaster.objects.filter(user=request.user).exists():
+        return redirect('profile')
     return render(request, 'choose_role.html')
 
 @login_required
@@ -71,7 +87,7 @@ def complete_advertiser_profile(request):
             advertiser = form.save(commit=False)
             advertiser.user = request.user
             advertiser.save()
-            return redirect('advertiser_dashboard')
+            return redirect('profile')
     else:
         form = AdvertiserProfileForm()
     return render(request, 'complete_profile.html', {'form': form, 'role': 'рекламодатель'})
@@ -84,7 +100,34 @@ def complete_webmaster_profile(request):
             webmaster = form.save(commit=False)
             webmaster.user = request.user
             webmaster.save()
-            return redirect('webmaster_dashboard')
+            return redirect('profile')
     else:
         form = WebmasterProfileForm()
     return render(request, 'complete_profile.html', {'form': form, 'role': 'вебмастер'})
+
+@login_required
+def profile(request):
+    user = request.user
+    advertiser_profile = None
+    webmaster_profile = None
+
+    try:
+        advertiser_profile = Advertiser.objects.get(user=user)
+    except Advertiser.DoesNotExist:
+        pass
+
+    try:
+        webmaster_profile = Webmaster.objects.get(user=user)
+    except Webmaster.DoesNotExist:
+        pass
+
+    context = {
+        'user': user,
+        'advertiser_profile': advertiser_profile,
+        'webmaster_profile': webmaster_profile,
+    }
+    return render(request, 'profile.html', context)
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login')

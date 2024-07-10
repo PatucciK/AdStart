@@ -1,14 +1,22 @@
 <!-- templates/email_confirmation.html -->
 {% extends "base.html" %}
+{% load form_tags %}
 {% block title %}Подтверждение почты{% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-md-6 offset-md-3">
-        <h2>Подтверждение почты</h2>
-        <form method="post">
+        <h2 class="my-4">Подтверждение почты</h2>
+        <form method="post" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Подтвердить</button>
+            <div class="form-group">
+                <label for="confirmation_code">Код подтверждения <span class="text-danger">*</span></label>
+                {{ form.confirmation_code|add_class:"form-control" }}
+                {% for error in form.confirmation_code.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="email" value="{{ email }}">
+            <button type="submit" class="btn btn-primary btn-block">Подтвердить</button>
         </form>
     </div>
 </div>

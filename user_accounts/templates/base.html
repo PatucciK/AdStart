@@ -1,31 +1,82 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <title>{% block title %}AdStart{% endblock %}</title>
+    <style>
+        .custom-btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        .custom-btn:hover {
+            opacity: 0.9;
+        }
+        .small-card {
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+        .card-header {
+            padding: 0.5rem 0.75rem;
+        }
+        .card-body {
+            padding: 0.5rem 0.75rem;
+        }
+        .sidebar {
+            position: fixed;
+            top: 60px; /* Adjust based on the height of your navbar */
+            left: 0;
+            width: 200px;
+            height: 100%;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #ddd;
+        }
+        .content {
+            margin-left: 220px; /* Adjust based on the width of your sidebar */
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Моя CRM</a>
+        <a class="navbar-brand" href="#">AdStart</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Вход</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Выход</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
-    <div class="container mt-4">
+
+    <div class="sidebar">
+        {% load custom_tags %}
+        {% load_menu %}
+    </div>
+
+    <div class="content">
         {% block content %}{% endblock %}
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 </body>
 </html>

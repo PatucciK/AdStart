@@ -4,9 +4,15 @@
 {% block content %}
 <div class="row">
     <div class="col-md-6 offset-md-3">
-        <h2>Выбор роли</h2>
-        <a href="{% url 'complete_advertiser_profile' %}" class="btn btn-primary btn-block">Я рекламодатель</a>
-        <a href="{% url 'complete_webmaster_profile' %}" class="btn btn-secondary btn-block">Я вебмастер</a>
+        <h2 class="my-4 text-center">Выбор роли</h2>
+        <div class="d-grid gap-3">
+            <a href="{% url 'complete_advertiser_profile' %}" class="btn btn-primary btn-lg btn-block custom-btn">
+                <i class="fas fa-bullhorn"></i> Я рекламодатель
+            </a>
+            <a href="{% url 'complete_webmaster_profile' %}" class="btn btn-success btn-lg btn-block custom-btn">
+                <i class="fas fa-laptop-code"></i> Я вебмастер
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

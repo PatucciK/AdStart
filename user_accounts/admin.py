@@ -1,10 +1,10 @@
+# user_accounts/admin.py
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 from .models import Advertiser, Webmaster
 
 
 class AdvertiserAdmin(admin.ModelAdmin):
-    list_display = ('user_email', 'telegram', 'phone')
+    list_display = ('user', 'telegram', 'phone')
 
     def user_email(self, obj):
         return obj.user.email
@@ -13,7 +13,7 @@ class AdvertiserAdmin(admin.ModelAdmin):
 
 
 class WebmasterAdmin(admin.ModelAdmin):
-    list_display = ('user_email', 'telegram', 'phone', 'is_approved')
+    list_display = ('user', 'telegram', 'phone', 'is_approved')
 
     def user_email(self, obj):
         return obj.user.email

@@ -1,0 +1,11 @@
+<!-- templates/content/article_detail.html -->
+{% extends "base.html" %}
+{% block title %}Информация{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>{{ article.title }}</h2>
+        <div>{{ article.content }}</div>
+    </div>
+</div>
+{% endblock %}

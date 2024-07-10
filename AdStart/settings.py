@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'user_accounts',
     'rest_framework',
     'drf_yasg',
+    'content'
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
