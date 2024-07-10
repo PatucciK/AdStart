@@ -1,0 +1,12 @@
+<!-- templates/choose_role.html -->
+{% extends "base.html" %}
+{% block title %}Выбор роли{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2>Выбор роли</h2>
+        <a href="{% url 'complete_advertiser_profile' %}" class="btn btn-primary btn-block">Я рекламодатель</a>
+        <a href="{% url 'complete_webmaster_profile' %}" class="btn btn-secondary btn-block">Я вебмастер</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+<!-- templates/email_confirmation.html -->
+{% extends "base.html" %}
+{% block title %}Подтверждение почты{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2>Подтверждение почты</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Подтвердить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

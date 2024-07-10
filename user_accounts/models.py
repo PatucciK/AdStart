@@ -1,68 +1,10 @@
 from datetime import timedelta
 from django.utils import timezone
-
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from django.db import models
 
-
-class CustomAdminUser(AbstractUser):
-    ROLES = [
-        ('admin', 'Admin'),
-        ('finance', 'Финансы'),
-        ('manager', 'Менеджер'),
-        ('designer', 'Верстальщик'),
-        ('call_center_operator', 'Оператор Колл-центра'),
-    ]
-    role = models.CharField(
-        max_length=20,
-        choices=ROLES,
-        verbose_name='Роль',
-        help_text='Роль пользователя'
-    )
-    telegram = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        verbose_name='Telegram',
-        help_text='Telegram аккаунт пользователя'
-    )
-    phone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name='Телефон',
-        help_text='Телефон пользователя'
-    )
-
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='customadminuser_set',
-        verbose_name='groups',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_query_name='customadminuser',
-    )
-
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='customadminuser_set',
-        verbose_name='user permissions',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_query_name='customadminuser',
-    )
-
-    class Meta:
-        verbose_name = 'Административный пользователь'
-        verbose_name_plural = 'Административные пользователи'
-
-
 class Advertiser(models.Model):
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Email',
-        help_text='Email рекламодателя'
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     telegram = models.CharField(
         max_length=50,
         blank=True,
@@ -77,13 +19,9 @@ class Advertiser(models.Model):
         verbose_name='Телефон',
         help_text='Телефон рекламодателя'
     )
-    password = models.CharField(
-        max_length=128,
-        verbose_name="Пароль"
-    )
 
     def __str__(self):
-        return self.email
+        return self.user.email
 
     class Meta:
         verbose_name = 'Рекламодатель'
@@ -91,11 +29,7 @@ class Advertiser(models.Model):
 
 
 class Webmaster(models.Model):
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Email',
-        help_text='Email вебмастера'
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     telegram = models.CharField(
         max_length=50,
         blank=True,
@@ -123,13 +57,15 @@ class Webmaster(models.Model):
         verbose_name='Скриншот статистики',
         help_text='Скриншот статистики вебмастера'
     )
-    password = models.CharField(
-        max_length=128,
-        verbose_name="Пароль"
+    is_approved = models.BooleanField(
+        verbose_name="Подтверждение администратором",
+        default=False,
+        help_text="Подтверждение регистрации вебмастера, для передачи вебмастеру доступа к системе поставьте галочку "
+                  "в этом поле и сохраните изменения!"
     )
 
     def __str__(self):
-        return self.email
+        return self.user.email
 
     class Meta:
         verbose_name = 'Вебмастер'
@@ -144,10 +80,8 @@ class EmailConfirmation(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def is_expired(self):
-        # Определите срок действия кода (например, 10 минут)
         expiration_time = self.updated_at + timedelta(minutes=10)
         return timezone.now() > expiration_time
-
 
     def __str__(self):
         return self.email

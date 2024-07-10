@@ -38,9 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_accounts',
-    'partner_management',
-    'offer_management',
-    'website_management',
     'rest_framework',
     'drf_yasg',
 ]
@@ -129,3 +126,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email settings for testing
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+

@@ -1,48 +1,25 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import Advertiser, Webmaster
 
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
 
-class AdvertiserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, label='Пароль')
-    password_confirm = forms.CharField(widget=forms.PasswordInput, label='Подтвердите пароль')
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
 
+class EmailConfirmationForm(forms.Form):
+    email = forms.EmailField(required=True)
+    confirmation_code = forms.CharField(max_length=6, required=True)
+
+class AdvertiserProfileForm(forms.ModelForm):
     class Meta:
         model = Advertiser
-        fields = ['email', 'telegram', 'phone']
+        fields = ['telegram', 'phone']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
-        telegram = cleaned_data.get("telegram")
-        phone = cleaned_data.get("phone")
-
-        if password and password != password_confirm:
-            raise forms.ValidationError("Пароли не совпадают")
-
-        if not telegram and not phone:
-            raise forms.ValidationError("Пожалуйста, укажите ваш Telegram или телефон")
-
-        if phone and (not phone.isdigit() or len(phone) != 10):
-            raise forms.ValidationError("Номер телефона должен содержать 10 цифр")
-
-        return cleaned_data
-
-
-class WebmasterRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, label='Пароль')
-    password_confirm = forms.CharField(widget=forms.PasswordInput, label='Подтвердите пароль')
-
+class WebmasterProfileForm(forms.ModelForm):
     class Meta:
         model = Webmaster
-        fields = ['email', 'telegram', 'phone', 'experience', 'stats_screenshot']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
-
-        if password and password != password_confirm:
-            raise forms.ValidationError("Пароли не совпадают")
-
-        return cleaned_data
+        fields = ['telegram', 'phone', 'experience', 'stats_screenshot']
