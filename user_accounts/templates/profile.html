@@ -1,4 +1,3 @@
-<!-- templates/profile.html -->
 {% extends "base.html" %}
 {% block title %}Профиль{% endblock %}
 {% block content %}
@@ -13,6 +12,7 @@
                 <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
             </div>
         </div>
+
         {% if advertiser_profile %}
             <div class="card mb-3 small-card">
                 <div class="card-header text-center">
@@ -23,6 +23,31 @@
                     <p><strong>Телефон:</strong> {{ advertiser_profile.phone }}</p>
                 </div>
             </div>
+
+            {% if advertiser_profile.partner_card %}
+                {% if advertiser_profile.partner_card.is_approved %}
+                    <div class="card mb-3 deposit-card">
+                        <div class="card-body text-center">
+                            <p class="deposit-amount">
+                                <i class="fas fa-wallet"></i>
+                                {{ advertiser_profile.partner_card.deposit }} RUB
+                            </p>
+                            <div class="alert alert-info mt-3">
+                                По кнопке "Детализация баланса" будет показан лидвол и дополнительная информация о транзакциях за каждого принятого лида.
+                            </div>
+                            <button class="btn btn-primary">Детализация баланса</button>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        Ваша карточка партнера находится на рассмотрении. Пожалуйста, ожидайте, с вами свяжется менеджер. После одобрения придет уведомление на почту.
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    Вам необходимо заполнить карточку партнера.
+                </div>
+            {% endif %}
         {% endif %}
 
         {% if webmaster_profile %}

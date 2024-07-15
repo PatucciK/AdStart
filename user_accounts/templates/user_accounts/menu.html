@@ -1,14 +1,20 @@
+<!-- templates/user_accounts/menu.html -->
 <div class="list-group">
-    <a href="{% url 'article_detail' %}" class="list-group-item list-group-item-action">Информация</a>
+    <a href="{% url 'article_list' %}" class="list-group-item list-group-item-action">Информация</a>
     {% if user.is_authenticated %}
         {% if advertiser_profile %}
-            <!-- Ссылки для рекламодателя -->
+            {% if advertiser_profile.partner_card.is_approved %}
+                <a href="{% url 'view_partner_card' %}" class="list-group-item list-group-item-action">Депозит</a>
+                <a href="{% url 'advertiser_offers' %}" class="list-group-item list-group-item-action">Мои офферы</a>
+            {% else %}
+                <a href="{% url 'edit_partner_card' %}" class="list-group-item list-group-item-action">Карточка партнера</a>
+            {% endif %}
         {% elif webmaster_profile %}
             <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Все заказы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
+                Все офферы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
             </a>
             <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Мои заказы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
+                Мои офферы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
             </a>
             <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
                 Лидвол {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
@@ -18,9 +24,6 @@
             </a>
             <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
                 Статистика {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
-            <a href="{% url 'article_detail' %}" class="list-group-item list-group-item-action">
-                Информация
             </a>
         {% endif %}
     {% endif %}

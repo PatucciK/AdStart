@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Мои офферы{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9 offset-md-3">
+        <h2 class="my-4">Мои офферы</h2>
+        <a href="{% url 'offer_create' %}" class="btn btn-primary mb-3">Добавить оффер</a>
+        {% for offer in offers %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>{{ offer.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Статус:</strong> {{ offer.get_status_display }}</p>
+                    <p><strong>Цена за лид:</strong> {{ offer.lead_price }} руб.</p>
+                    <a href="{% url 'offer_detail' offer.pk %}" class="btn btn-secondary">Просмотреть</a>
+                    <a href="{% url 'offer_edit' offer.pk %}" class="btn btn-primary">Редактировать</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

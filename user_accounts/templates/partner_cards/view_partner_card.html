@@ -1,0 +1,66 @@
+<!-- templates/partner_cards/view_partner_card.html -->
+{% extends "base.html" %}
+{% block title %}Карточка партнера{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9 offset-md-3">
+        <div class="card mb-3 small-card">
+            <div class="card-header text-center">
+                <h5>Карточка партнера</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Логотип:</strong></p>
+                {% if partner_card.logo %}
+                    <img src="{{ partner_card.logo.url }}" alt="Логотип" class="img-fluid mb-3">
+                {% endif %}
+                <p><strong>Наименование рекламной компании:</strong> {{ partner_card.name }}</p>
+                <p><strong>Наименование юридического лица:</strong> {{ partner_card.legal_name }}</p>
+                <p><strong>Лицензия:</strong>
+                    {% if partner_card.license %}
+                        <a href="{{ partner_card.license.url }}" target="_blank">Просмотреть</a>
+                    {% endif %}
+                </p>
+                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ partner_card.website }}" target="_blank">{{ partner_card.website }}</a></p>
+                <p><strong>Юридический адрес:</strong> {{ partner_card.legal_address }}</p>
+                <p><strong>Фактический адрес:</strong> {{ partner_card.actual_addresses }}</p>
+                <p><strong>Реквизиты компании:</strong> {{ partner_card.company_details }}</p>
+                <p><strong>Договор, акты, доп. соглашения:</strong>
+                    {% if partner_card.contracts %}
+                        <a href="{{ partner_card.contracts.url }}" target="_blank">Просмотреть</a>
+                    {% endif %}
+                </p>
+                <p><strong>Телефон основной:</strong> {{ partner_card.main_phone }}</p>
+                <p><strong>Статус:</strong>
+                    {% if partner_card.is_approved %}
+                        <span class="text-success">Одобрено</span>
+                    {% else %}
+                        <span class="text-danger">Не одобрено</span>
+                    {% endif %}
+                </p>
+                <a href="{% url 'edit_partner_card' %}" class="btn btn-primary mt-3">Редактировать</a>
+            </div>
+        </div>
+        {% if partner_card.is_approved %}
+            <div class="card mb-3 deposit-card">
+                <div class="card-header text-center">
+                    <h5>Депозит</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="wallet-info d-flex justify-content-center align-items-center">
+                        <div class="wallet-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <p class="deposit-amount ml-2">{{ partner_card.deposit }} руб.</p>
+                    </div>
+                    <p class="balance-info text-muted">По кнопке "Детализация баланса" будет показан лидвол и дополнительная информация о транзакциях за каждого принятого лида.</p>
+                    <a href="#" class="btn btn-primary">Детализация баланса</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-3">
+                Карточка партнера находится на рассмотрении. Пожалуйста, ожидайте, с вами свяжется менеджер. После одобрения придет уведомление на почту.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

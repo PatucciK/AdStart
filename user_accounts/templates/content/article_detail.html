@@ -1,11 +1,18 @@
-<!-- templates/content/article_detail.html -->
 {% extends "base.html" %}
-{% block title %}Информация{% endblock %}
+{% block title %}{{ article.title }}{% endblock %}
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
-        <h2>{{ article.title }}</h2>
-        <div>{{ article.content }}</div>
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            {% if article.image %}
+                <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h2 class="card-title">{{ article.title }}</h2>
+                <p class="card-text"><small class="text-muted">{{ article.created_at|date:"d M Y" }}</small></p>
+                <div class="card-text">{{ article.content|safe }}</div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

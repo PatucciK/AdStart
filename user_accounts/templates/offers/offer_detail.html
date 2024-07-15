@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Детали оффера{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9 offset-md-3">
+        <h2 class="my-4">Детали оффера</h2>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>{{ offer.name }}</h5>
+            </div>
+            <div class="card-body">
+                {% if offer.logo %}
+                    <p><strong>Логотип:</strong></p>
+                    <img src="{{ offer.logo.url }}" alt="Логотип" class="img-fluid mb-3">
+                {% endif %}
+                <p><strong>Наименование юридического лица:</strong> {{ offer.legal_name }}</p>
+                <p><strong>ИНН:</strong> {{ offer.inn }}</p>
+                <p><strong>Номер Договора:</strong> {{ offer.contract_number }}</p>
+                <p><strong>Дата Договора:</strong> {{ offer.contract_date }}</p>
+                <p><strong>Лицензия:</strong>
+                    {% if offer.license %}
+                        <a href="{{ offer.license.url }}" target="_blank">Просмотреть</a>
+                    {% endif %}
+                </p>
+                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ offer.website }}" target="_blank">{{ offer.website }}</a></p>
+                <p><strong>Юридический адрес:</strong> {{ offer.legal_address }}</p>
+                <p><strong>Фактический адрес:</strong> {{ offer.actual_addresses }}</p>
+                <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
+                <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
+                <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
+                <p><strong>Валидность лида:</strong> {{ offer.lead_validity }}</p>
+                <p><strong>Ссылка на посадку:</strong> <a href="{{ offer.landing_page }}" target="_blank">{{ offer.landing_page }}</a></p>
+                <p><strong>Документация по отправке постзапросов:</strong> {{ offer.postback_documentation }}</p>
+                <p><strong>Цена за лид:</strong> {{ offer.lead_price }} руб.</p>
+                <p><strong>Статус:</strong> {{ offer.get_status_display }}</p>
+                <p><strong>Публичный статус:</strong> {{ offer.get_public_status_display }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

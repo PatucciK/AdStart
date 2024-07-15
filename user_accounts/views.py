@@ -9,6 +9,7 @@ import string
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+from partner_cards.models import PartnerCard
 
 User = get_user_model()
 

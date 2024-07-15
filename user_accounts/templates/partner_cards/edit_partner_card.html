@@ -1,0 +1,45 @@
+<!-- templates/partner_cards/edit_partner_card.html -->
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}Редактирование карточки партнера{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card my-4 p-3">
+            <h2 class="text-center mb-4">Редактирование карточки партнера</h2>
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+                        {{ field|add_class:"form-control form-control-sm" }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary btn-block">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    .form-label {
+        font-size: 14px;
+    }
+    .form-control {
+        font-size: 14px;
+        line-height: 1.2;
+    }
+    .card {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Все статьи{% endblock %}
+{% block content %}
+<div class="row">
+    {% for article in articles %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if article.image %}
+                    <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ article.title }}</h5>
+                    <p class="card-text"><small class="text-muted">{{ article.created_at|date:"d M Y" }}</small></p>
+                    <p class="card-text">{{ article.get_excerpt }}</p>
+                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary">Читать далее</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

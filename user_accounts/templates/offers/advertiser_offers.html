@@ -1,0 +1,19 @@
+<!-- templates/offers/advertiser_offers.html -->
+{% extends "base.html" %}
+{% block title %}Мои офферы{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9 offset-md-3">
+        <h2 class="my-4 text-center">Мои офферы</h2>
+        <div class="list-group">
+            {% for offer in offers %}
+                <a href="#" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ offer.name }}</h5>
+                    <p class="mb-1">{{ offer.service_description|truncatewords:20 }}</p>
+                    <small>Цена за лид: {{ offer.lead_price }} руб.</small>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
