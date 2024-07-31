@@ -1,0 +1,35 @@
+<!-- templates/offers/available_offers.html -->
+{% extends "base.html" %}
+{% block title %}Все доступные офферы{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <h2 class="my-4 text-center">Все доступные офферы</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Цена за лид</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in offers %}
+                    <tr>
+                        <td>{{ offer.name }}</td>
+                        <td>{{ offer.service_description|truncatewords:20 }}</td>
+                        <td>{{ offer.lead_price }} руб.</td>
+                        <td>
+                            <form method="post" action="{% url 'take_offer' offer.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">Взять в работу</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

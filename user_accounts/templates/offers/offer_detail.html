@@ -1,39 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Детали оффера{% endblock %}
+{% block title %}{{ offer.name }}{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-9 offset-md-3">
-        <h2 class="my-4">Детали оффера</h2>
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>{{ offer.name }}</h5>
-            </div>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="my-4 text-center">{{ offer.name }}</h2>
+        <div class="card">
             <div class="card-body">
-                {% if offer.logo %}
-                    <p><strong>Логотип:</strong></p>
-                    <img src="{{ offer.logo.url }}" alt="Логотип" class="img-fluid mb-3">
-                {% endif %}
-                <p><strong>Наименование юридического лица:</strong> {{ offer.legal_name }}</p>
-                <p><strong>ИНН:</strong> {{ offer.inn }}</p>
-                <p><strong>Номер Договора:</strong> {{ offer.contract_number }}</p>
-                <p><strong>Дата Договора:</strong> {{ offer.contract_date }}</p>
-                <p><strong>Лицензия:</strong>
-                    {% if offer.license %}
-                        <a href="{{ offer.license.url }}" target="_blank">Просмотреть</a>
-                    {% endif %}
-                </p>
-                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ offer.website }}" target="_blank">{{ offer.website }}</a></p>
-                <p><strong>Юридический адрес:</strong> {{ offer.legal_address }}</p>
-                <p><strong>Фактический адрес:</strong> {{ offer.actual_addresses }}</p>
+                <p><strong>Наименование юридического лица:</strong> {{ offer.partner_card.legal_name }}</p>
+                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ offer.partner_card.website }}" target="_blank">{{ offer.partner_card.website }}</a></p>
+                <p><strong>Юридический адрес:</strong> {{ offer.partner_card.legal_address }}</p>
+                <p><strong>Фактический адрес:</strong> {{ offer.partner_card.actual_addresses }}</p>
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
                 <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
                 <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
-                <p><strong>Валидность лида:</strong> {{ offer.lead_validity }}</p>
-                <p><strong>Ссылка на посадку:</strong> <a href="{{ offer.landing_page }}" target="_blank">{{ offer.landing_page }}</a></p>
-                <p><strong>Документация по отправке постзапросов:</strong> {{ offer.postback_documentation }}</p>
                 <p><strong>Цена за лид:</strong> {{ offer.lead_price }} руб.</p>
+                <p><strong>Дата договора:</strong> {{ offer.contract_date }}</p>
                 <p><strong>Статус:</strong> {{ offer.get_status_display }}</p>
                 <p><strong>Публичный статус:</strong> {{ offer.get_public_status_display }}</p>
+
+                <div class="d-flex justify-content-between">
+                    {% if offer.status == 'registered' %}
+                        <form method="post" action="{% url 'pause_offer' offer.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-pause"></i> Поставить на паузу
+                            </button>
+                        </form>
+                    {% elif offer.status == 'paused' %}
+                        <form method="post" action="{% url 'unpause_offer' offer.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-play"></i> Вернуть в регистрацию
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if offer.public_status == 'public' and offer.status == 'registered' or offer.status == 'paused' or offer.status == 'stopped' %}
+                        <form method="post" action="{% url 'delete_offer' offer.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Удалить оффер
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

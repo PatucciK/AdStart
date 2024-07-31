@@ -1,0 +1,33 @@
+<!-- templates/offers/webmaster_offer_detail.html -->
+{% extends "base.html" %}
+{% block title %}{{ offer.name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="my-4 text-center">{{ offer.name }}</h2>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Логотип:</strong>
+                    {% if offer.partner_card.logo %}
+                        <img src="{{ offer.partner_card.logo.url }}" alt="{{ offer.name }}" width="100">
+                    {% else %}
+                        нет лого
+                    {% endif %}
+                </p>
+                <p><strong>Наименование компании:</strong> {{ offer.partner_card.name }}</p>
+                <p><strong>Наименование юридического лица:</strong> {{ offer.partner_card.legal_name }}</p>
+                <p><strong>Лицензия:</strong> {% if offer.partner_card.license %}<a href="{{ offer.partner_card.license.url }}">Скачать</a>{% else %}Нет{% endif %}</p>
+                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ offer.partner_card.website }}" target="_blank">{{ offer.partner_card.website }}</a></p>
+                <p><strong>Юридический адрес:</strong> {{ offer.partner_card.legal_address }}</p>
+                <p><strong>Фактический адрес:</strong> {{ offer.partner_card.actual_addresses }}</p>
+                <p><strong>Телефон для переадресации:</strong> (mts.exolve.buy_number)</p>
+                <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
+                <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
+                <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
+                <p><strong>Токен:</strong> {{ offer.unique_token }}</p>
+                <p><strong>Документация по внедрению пост-запроса:</strong> <a href="#">Ссылка на документацию</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

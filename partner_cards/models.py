@@ -8,10 +8,10 @@ class PartnerCard(models.Model):
     name = models.CharField(max_length=255, verbose_name='Наименование')
     legal_name = models.CharField(max_length=255, verbose_name='Наименование Юр. лица')
     license = models.FileField(upload_to='licenses/', blank=True, null=True, verbose_name='Лицензия')
-    website = models.URLField(blank=True, null=True, verbose_name='Ссылка на официальный сайт')
+    website = models.URLField(verbose_name='Ссылка на официальный сайт')
     legal_address = models.CharField(max_length=255, verbose_name='Юридический адрес')
-    actual_addresses = models.TextField(blank=True, null=True, verbose_name='Фактический адрес')
-    company_details = models.TextField(verbose_name='Реквизиты компании')
+    actual_addresses = models.TextField(verbose_name='Фактический адрес')
+    company_details = models.TextField(verbose_name='Реквизиты компании', blank=True, null=True,)
     contracts = models.FileField(upload_to='contracts/', blank=True, null=True,
                                  verbose_name='Договор, акты, доп. соглашения')
     main_phone = models.CharField(max_length=20, verbose_name='Телефон основной')

@@ -31,6 +31,12 @@ class AdvertiserProfileForm(forms.ModelForm):
             'telegram': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
         }
+        labels = {
+            'telegram': 'Телеграм для связи с рекламодателем (наш менеджер свяжется с вами в Telegram для '
+                        'подтверждения регистрации)',
+            'phone': 'Телефон для связи с рекламодателем прямой (наш менеджер свяжется с вами для подтверждения '
+                     'регистрации)',
+        }
 
 
 class WebmasterProfileForm(forms.ModelForm):

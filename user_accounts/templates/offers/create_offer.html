@@ -1,0 +1,70 @@
+<!-- templates/offers/create_offer.html -->
+{% extends "base.html" %}
+{% block title %}Создать новый оффер{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="my-4 text-center">Создать новый оффер</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.logo.label_tag }}
+                        {{ form.logo }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.inn.label_tag }}
+                        {{ form.inn }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.working_hours.label_tag }}
+                        {{ form.working_hours }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.service_description.label_tag }}
+                        {{ form.service_description }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.geo.label_tag }}
+                        {{ form.geo }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.public_status.label_tag }}
+                        {{ form.public_status }}
+                    </div>
+                    <div class="form-group" id="lead-price-group" style="display: none;">
+                        {{ form.lead_price.label_tag }}
+                        {{ form.lead_price }}
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const publicStatusField = document.querySelector('select[name="public_status"]');
+        const leadPriceGroup = document.getElementById('lead-price-group');
+
+        function toggleLeadPrice() {
+            if (publicStatusField.value === 'public') {
+                leadPriceGroup.style.display = 'block';
+            } else {
+                leadPriceGroup.style.display = 'none';
+            }
+        }
+
+        publicStatusField.addEventListener('change', toggleLeadPrice);
+        toggleLeadPrice(); // Run on page load
+    });
+</script>
+{% endblock %}

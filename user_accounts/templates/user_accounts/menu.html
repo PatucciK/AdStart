@@ -6,25 +6,16 @@
             {% if advertiser_profile.partner_card.is_approved %}
                 <a href="{% url 'view_partner_card' %}" class="list-group-item list-group-item-action">Депозит</a>
                 <a href="{% url 'advertiser_offers' %}" class="list-group-item list-group-item-action">Мои офферы</a>
+
             {% else %}
                 <a href="{% url 'edit_partner_card' %}" class="list-group-item list-group-item-action">Карточка партнера</a>
             {% endif %}
         {% elif webmaster_profile %}
-            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Все офферы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
-            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Мои офферы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
-            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Лидвол {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
-            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Финансы {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
-            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">
-                Статистика {% if not webmaster_profile.is_approved %}(Недоступно){% endif %}
-            </a>
+            <a href="{% url 'available_offers' %}" class="list-group-item list-group-item-action">Все офферы</a>
+            <a href="{% url 'my_offers' %}" class="list-group-item list-group-item-action">Мои офферы</a>
+            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Лидвол{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
+            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Финансы{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
+            <a href="#" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Статистика{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
         {% endif %}
     {% endif %}
 </div>

@@ -1,31 +1,41 @@
 from django import forms
 from .models import Offer
 
+
 class OfferForm(forms.ModelForm):
     class Meta:
         model = Offer
-        fields = [
-            'status', 'logo', 'name', 'legal_name', 'inn', 'contract_number', 'contract_date',
-            'license', 'website', 'legal_address', 'actual_addresses', 'working_hours', 'service_description',
-            'geo', 'lead_validity', 'landing_page', 'postback_documentation', 'lead_price'
-        ]
-        labels = {
-            'status': 'Актуальность',
-            'logo': 'Логотип',
-            'name': 'Наименование',
-            'legal_name': 'Наименование Юр. лица',
-            'inn': 'ИНН',
-            'contract_number': 'Номер Договора',
-            'contract_date': 'Дата Договора',
-            'license': 'Лицензия',
-            'website': 'Ссылка на официальный сайт',
-            'legal_address': 'Юридический адрес',
-            'actual_addresses': 'Фактический адрес',
-            'working_hours': 'Режим работы',
-            'service_description': 'Описание услуг по офферу',
-            'geo': 'ГЕО',
-            'lead_validity': 'Валидность лида',
-            'landing_page': 'Ссылка на посадку',
-            'postback_documentation': 'Документация по отправке постзапросов',
-            'lead_price': 'Цена за лид'
+        fields = ['logo', 'name', 'inn', 'working_hours', 'service_description', 'geo', 'public_status', 'lead_price']
+        widgets = {
+            'lead_price': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
         }
+        labels = {
+            'logo': 'Логотип компании (для размещения на рекламных сайтах)',
+            'name': 'Наименование оффера (это название будут видеть веб-мастера)',
+            'inn': 'ИНН (для размещения на рекламных сайтах)',
+            'working_hours': 'Режим работы колл-центра',
+            'service_description': 'Описание услуг по офферу (опишите всю полезную информацию для веб-мастера)',
+            'geo': 'Гео (опишите расположение (страна, город, регион), откуда принимаются лиды)',
+            'public_status': 'Статус публичности (при закрытом статусе - цену за лида и подбор вебмастера назначает менеджер,'
+                              ' при публичном статусе - цену за лида назначаете вы, все одобренные вебмастера могут принять оффер)',
+            'lead_price': 'Цена за лид, руб',
+        }
+
+
+    def __init__(self, *args, **kwargs):
+        super(OfferForm, self).__init__(*args, **kwargs)
+        self.fields['lead_price'].required = False
+        self.fields['public_status'].help_text = "При публичном статусе заказ могут принять все одобренные вебмастера. Цену за лида нельзя будет поменять. При закрытом статусе - цену за лида назначает менеджер."
+
+    def clean(self):
+        cleaned_data = super().clean()
+        public_status = cleaned_data.get('public_status')
+        lead_price = cleaned_data.get('lead_price')
+
+        if public_status == 'public' and not lead_price:
+            self.add_error('lead_price', 'При публичном статусе нужно указать цену за лид.')
+
+        if public_status == 'private':
+            cleaned_data['lead_price'] = None  # Администратор назначает цену
+
+        return cleaned_data
