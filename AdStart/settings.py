@@ -47,6 +47,18 @@ INSTALLED_APPS = [
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',  # Настройте это значение в зависимости от вашей нагрузки
+        'user': '1000/day'
+    }
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

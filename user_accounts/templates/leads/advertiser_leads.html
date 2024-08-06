@@ -1,0 +1,134 @@
+<!-- templates/leads/advertiser_leads.html -->
+{% extends "base.html" %}
+{% block title %}Лиды рекламодателя{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <h2 class="my-4 text-center">Лиды рекламодателя</h2>
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="offer_id">Оффер</label>
+                    <select id="offer_id" name="offer_id" class="form-control">
+                        <option value="">Все офферы</option>
+                        {% for offer in offers %}
+                        <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status">Статус</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">Все статусы</option>
+                        {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
+                        <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="start_date">Дата от</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date">Дата до</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Фильтровать</button>
+            </div>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Телефон</th>
+                    <th>Описание</th>
+                    <th>Статус</th>
+                    <th>Оффер</th>
+                    <th>Дата создания</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td>{{ lead.id }}</td>
+                    <td>{{ lead.name }}</td>
+                    <td>{{ lead.phone }}</td>
+                    <td>{{ lead.description|truncatewords:10 }}</td>
+                    <td>
+                        {% if lead.status not in 'paid,expired,trash,duplicate,rejected,visit' %}
+                        <select class="form-control lead-status" data-lead-id="{{ lead.id }}">
+                            {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
+                                <option value="{{ status }}" {% if lead.status == status %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        {{ lead.get_status_display }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'offer_detail' lead.offer.id %}">
+                            {{ lead.offer.name }}
+                        </a>
+                    </td>
+                    <td>{{ lead.created_at|date:"d.m.Y" }}</td>
+                    <td>
+                        {% if lead.status not in 'paid,expired,trash,duplicate,rejected,visit' %}
+                        <button class="btn btn-primary btn-sm update-status" data-lead-id="{{ lead.id }}">
+                            Изменить статус
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const updateButtons = document.querySelectorAll('.update-status');
+
+    updateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const leadId = this.getAttribute('data-lead-id');
+            const selectElement = document.querySelector(`select[data-lead-id="${leadId}"]`);
+            const newStatus = selectElement.value;
+
+            fetch("{% url 'advertiser_leads' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    'lead_id': leadId,
+                    'status': newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Статус успешно обновлён');
+                    location.reload(); // Перезагрузить страницу после успешного обновления
+                } else {
+                    alert('Ошибка при обновлении статуса: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при обновлении статуса');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,8 +1,9 @@
 from django.db import models
 from partner_cards.models import PartnerCard
 from user_accounts.models import Webmaster
-from datetime import date
+from datetime import date, timedelta
 import uuid
+
 
 class Offer(models.Model):
     STATUS_CHOICES = [
@@ -28,7 +29,8 @@ class Offer(models.Model):
     geo = models.CharField(max_length=255, blank=True, null=True, verbose_name='ГЕО')
     lead_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за лид', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='registered', verbose_name='Актуальность')
-    public_status = models.CharField(max_length=20, choices=PUBLIC_STATUS_CHOICES, default='private', verbose_name='Публичный статус')
+    public_status = models.CharField(max_length=20, choices=PUBLIC_STATUS_CHOICES, default='private',
+                                     verbose_name='Публичный статус')
     webmaster = models.ForeignKey(Webmaster, on_delete=models.SET_NULL, blank=True, null=True, related_name='offers')
     unique_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name='Уникальный токен',
                                     help_text='Уникальный токен для определения связи между оффером и вебмастером')
@@ -47,3 +49,45 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Оффер'
         verbose_name_plural = 'Офферы'
+
+
+class LeadWall(models.Model):
+    LEAD_STATUS_CHOICES = [
+        ('new', 'Новый лид'),
+        ('expired', 'Просрочено'),
+        ('paid', 'Оплачено'),
+        ('no_response', 'Нет ответа'),
+        ('on_hold', 'Холд'),
+        ('callback', 'Перезвонить'),
+        ('appointment', 'Запись на прием'),
+        ('visit', 'Визит'),
+        ('cancelled', 'Отмена'),
+        ('trash', 'Треш'),
+        ('duplicate', 'Дубль'),
+    ]
+
+    offer = models.OneToOneField(Offer, on_delete=models.CASCADE, to_field='unique_token', related_name='lead_wall',
+                                 verbose_name='Оффер')
+    name = models.CharField(max_length=255, verbose_name='Имя пользователя')
+    phone = models.CharField(max_length=15, verbose_name='Номер мобильного телефона')
+    description = models.TextField(blank=True, null=True, verbose_name='Дополнительное поле')
+    status = models.CharField(max_length=20, choices=LEAD_STATUS_CHOICES, default='new', verbose_name='Статус лида')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    def __str__(self):
+        return f'{self.name} - {self.status}'
+
+    def can_change_to(self, new_status):
+        """
+        Проверяет, может ли текущий статус быть изменен на новый.
+        """
+        unchangeable_statuses = {'paid', 'expired', 'trash', 'duplicate', 'rejected', 'visit'}
+        if self.status in unchangeable_statuses:
+            return False
+        if new_status in unchangeable_statuses and not self.offer.partner_card.advertiser.user.is_superuser:
+            return False
+        return True
+
+    class Meta:
+        verbose_name = 'Лидвол'
+        verbose_name_plural = 'Лидволы'

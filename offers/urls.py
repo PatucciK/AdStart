@@ -5,7 +5,8 @@ from .views import (
     OfferDetailView,
     DeleteOfferView,
     PauseOfferView,
-    UnpauseOfferView, AvailableOffersView, MyOffersView, take_offer, WebmasterOfferDetailView
+    UnpauseOfferView, AvailableOffersView, MyOffersView, take_offer, WebmasterOfferDetailView, WebmasterLeadsView,
+    AdvertiserLeadsView
 )
 
 urlpatterns = [
@@ -22,4 +23,6 @@ urlpatterns += [
     path('my_offers/', MyOffersView.as_view(), name='my_offers'),
     path('take_offer/<int:offer_id>/', take_offer, name='take_offer'),
     path('webmaster/<int:pk>/', WebmasterOfferDetailView.as_view(), name='webmaster_offer_detail'),
+    path('webmaster/leads/', WebmasterLeadsView.as_view(), name='webmaster_leads'),
+    path('advertiser/leads/', AdvertiserLeadsView.as_view(), name='advertiser_leads'),
 ]
