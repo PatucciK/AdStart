@@ -1,12 +1,11 @@
-<!-- templates/offers/my_offers.html -->
 {% extends "base.html" %}
 {% block title %}Мои офферы{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="my-4 text-center">Мои офферы</h2>
-        <table class="table table-striped">
-            <thead>
+        <table class="table table-hover table-sm">
+            <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
                     <th>Логотип</th>
@@ -17,23 +16,99 @@
             </thead>
             <tbody>
                 {% for offer in offers %}
-                    <tr>
-                        <td><a href="{% url 'webmaster_offer_detail' offer.id %}">{{ offer.id }}</a></td>
-                        <td>
-                            {% if offer.logo %}
-                                <img src="{{ offer.logo.url }}" alt="{{ offer.name }}" width="50">
-                            {% else %}
-                                Нет логотипа
-                            {% endif %}
-                        </td>
-                        <td>{{ offer.name }}</td>
-                        <td>{{ offer.service_description|truncatewords:20 }}</td>
-                        <td>{{ offer.lead_price }} руб.</td>
-                    </tr>
+                <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}">
+                    <td>{{ offer.id }}</td>
+                    <td>
+                        {% if offer.logo %}
+                        <img src="{{ offer.logo.url }}" alt="{{ offer.name }}" width="50">
+                        {% else %}
+                        Нет логотипа
+                        {% endif %}
+                    </td>
+                    <td>{{ offer.name }}</td>
+                    <td>{{ offer.service_description|truncatewords:20 }}</td>
+                    <td>{{ offer.lead_price }} руб.</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+        <div class="pagination justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if offers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ offers.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in offers.paginator.page_range %}
+                    {% if offers.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}<span class="sr-only">(current)</span></span>
+                    </li>
+                    {% elif num > offers.number|add:'-3' and num < offers.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if offers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ offers.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ offers.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- Добавим JavaScript для перехода при клике на строку -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(row => {
+            row.addEventListener('click', function() {
+                window.location.href = this.dataset.href;
+            });
+        });
+    });
+</script>
 {% endblock %}

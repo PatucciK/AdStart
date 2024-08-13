@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Offer, LeadWall
+from .models import Offer, LeadWall, OfferWebmaster
 
 
 @admin.register(Offer)
@@ -21,13 +21,22 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(LeadWall)
 class LeadWallAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'status', 'offer')
-    list_filter = ('status', 'offer__name')
-    search_fields = ('name', 'phone', 'description', 'offer__name')
+    list_display = ('name', 'processing_status', 'status', 'get_offer_name')
+    list_filter = ('processing_status', 'status', 'offer_webmaster__offer__name')
+    search_fields = ('name', 'description', 'offer_webmaster__offer__name')
+
+    def get_offer_name(self, obj):
+        return obj.offer_webmaster.offer.name
+    get_offer_name.short_description = 'Оффер'
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = self.readonly_fields
         if not request.user.is_superuser:
             # Ограничить изменение полей, кроме администратора
-            readonly_fields += ('status',)
+            readonly_fields += ('processing_status',)
         return readonly_fields
+
+@admin.register(OfferWebmaster)
+class OfferWebmasterAdmin(admin.ModelAdmin):
+    list_display = ('offer', 'webmaster', 'unique_token')
+    search_fields = ('offer__name', 'webmaster__name', 'unique_token')

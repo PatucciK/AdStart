@@ -5,8 +5,17 @@ from .views import (
     OfferDetailView,
     DeleteOfferView,
     PauseOfferView,
-    UnpauseOfferView, AvailableOffersView, MyOffersView, take_offer, WebmasterOfferDetailView, WebmasterLeadsView,
-    AdvertiserLeadsView
+    UnpauseOfferView,
+    AvailableOffersView,
+    MyOffersView,
+    take_offer,
+    WebmasterOfferDetailView,
+    WebmasterLeadsView,
+    WebmasterOfferStatisticsView,
+    WebmasterFinancialStatisticsView,
+    AdvertiserOfferStatisticsView,
+    AdvertiserFinancialStatisticsView,
+    AdvertiserLeadsView,
 )
 
 urlpatterns = [
@@ -16,6 +25,8 @@ urlpatterns = [
     path('delete_offer/<int:pk>/', DeleteOfferView.as_view(), name='delete_offer'),
     path('pause_offer/<int:pk>/', PauseOfferView.as_view(), name='pause_offer'),
     path('unpause_offer/<int:pk>/', UnpauseOfferView.as_view(), name='unpause_offer'),
+    path('webmaster/statistics/offers/', WebmasterOfferStatisticsView.as_view(), name='webmaster_offer_statistics'),
+    path('webmaster/statistics/financial/', WebmasterFinancialStatisticsView.as_view(), name='webmaster_financial_statistics'),
 ]
 
 urlpatterns += [
@@ -24,5 +35,7 @@ urlpatterns += [
     path('take_offer/<int:offer_id>/', take_offer, name='take_offer'),
     path('webmaster/<int:pk>/', WebmasterOfferDetailView.as_view(), name='webmaster_offer_detail'),
     path('webmaster/leads/', WebmasterLeadsView.as_view(), name='webmaster_leads'),
+    path('advertiser/statistics/offers/', AdvertiserOfferStatisticsView.as_view(), name='advertiser_offer_statistics'),
+    path('advertiser/statistics/financial/', AdvertiserFinancialStatisticsView.as_view(), name='advertiser_financial_statistics'),
     path('advertiser/leads/', AdvertiserLeadsView.as_view(), name='advertiser_leads'),
 ]

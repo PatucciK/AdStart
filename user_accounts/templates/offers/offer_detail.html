@@ -35,7 +35,7 @@
                         </form>
                     {% endif %}
 
-                    {% if offer.public_status == 'public' and offer.status == 'registered' or offer.status == 'paused' or offer.status == 'stopped' %}
+                    {% if offer.public_status == 'public' and offer.status in 'registered, paused, stopped' %}
                         <form method="post" action="{% url 'delete_offer' offer.id %}" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">

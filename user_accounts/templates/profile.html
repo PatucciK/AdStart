@@ -35,7 +35,7 @@
                             <div class="alert alert-info mt-3">
                                 По кнопке "Детализация баланса" будет показан лидвол и дополнительная информация о транзакциях за каждого принятого лида.
                             </div>
-                            <button class="btn btn-primary">Детализация баланса</button>
+                            <a href="{% url 'advertiser_financial_statistics' %}" class="btn btn-primary">Детализация баланса</a>
                         </div>
                     </div>
                 {% else %}
@@ -71,13 +71,28 @@
                             <span class="text-danger">&#10008;</span>
                         {% endif %}
                     </p>
-                    {% if not webmaster_profile.is_approved %}
-                        <div class="alert alert-info" role="alert">
-                            Ваша заявка на подключение еще находится на стадии рассмотрения. Пожалуйста, дождитесь уведомления на почту.
-                        </div>
-                    {% endif %}
                 </div>
             </div>
+
+            {% if webmaster_profile.is_approved %}
+                <div class="card mb-3 deposit-card">
+                    <div class="card-body text-center">
+                        <p class="deposit-amount">
+                            <i class="fas fa-wallet"></i>
+                            {{ webmaster_profile.balance }} RUB
+                        </p>
+                        <div class="alert alert-info mt-3">
+                            По кнопке "Детализация баланса" будет показан лидвол и дополнительная информация о транзакциях.
+                        </div>
+                        <a href="{% url 'webmaster_financial_statistics' %}" class="btn btn-primary">Детализация баланса</a>
+                        <button class="btn btn-secondary">Заявка на вывод средств</button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    Ваша заявка на подключение еще находится на стадии рассмотрения. Пожалуйста, дождитесь уведомления на почту.
+                </div>
+            {% endif %}
         {% endif %}
 
         {% if not advertiser_profile and not webmaster_profile %}

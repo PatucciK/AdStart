@@ -1,7 +1,12 @@
 # user_accounts/views.py
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model, logout, authenticate, login
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import UserRegistrationForm, EmailConfirmationForm, AdvertiserProfileForm, WebmasterProfileForm
 from .models import EmailConfirmation, Advertiser, Webmaster
 import random
@@ -13,6 +18,22 @@ from partner_cards.models import PartnerCard
 
 User = get_user_model()
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CustomLoginView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'registration/login.html')
+
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"success": True}, status=200)
+        else:
+            return JsonResponse({"success": False, "error": "Неверное имя пользователя или пароль."}, status=401)
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -46,6 +67,7 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
 
+
 def email_confirmation(request):
     email = request.session.get('email')
     if not email:
@@ -74,11 +96,13 @@ def email_confirmation(request):
         form = EmailConfirmationForm()
     return render(request, 'email_confirmation.html', {'form': form, 'email': email})
 
+
 @login_required
 def choose_role(request):
     if Advertiser.objects.filter(user=request.user).exists() or Webmaster.objects.filter(user=request.user).exists():
         return redirect('profile')
     return render(request, 'choose_role.html')
+
 
 @login_required
 def complete_advertiser_profile(request):
@@ -93,6 +117,7 @@ def complete_advertiser_profile(request):
         form = AdvertiserProfileForm()
     return render(request, 'complete_profile.html', {'form': form, 'role': 'рекламодатель'})
 
+
 @login_required
 def complete_webmaster_profile(request):
     if request.method == 'POST':
@@ -105,6 +130,7 @@ def complete_webmaster_profile(request):
     else:
         form = WebmasterProfileForm()
     return render(request, 'complete_profile.html', {'form': form, 'role': 'вебмастер'})
+
 
 @login_required
 def profile(request):
@@ -128,6 +154,7 @@ def profile(request):
         'webmaster_profile': webmaster_profile,
     }
     return render(request, 'profile.html', context)
+
 
 def custom_logout(request):
     logout(request)

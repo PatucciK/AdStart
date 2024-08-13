@@ -64,6 +64,7 @@ class Webmaster(models.Model):
         help_text="Подтверждение регистрации вебмастера, для передачи вебмастеру доступа к системе поставьте галочку "
                   "в этом поле и сохраните изменения!"
     )
+    balance = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Баланс', default=0)
 
     def __str__(self):
         return self.user.email

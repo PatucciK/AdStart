@@ -2,6 +2,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import CustomLoginView
 
 urlpatterns = [
     path('register/', views.register, name='register'),
@@ -10,7 +11,7 @@ urlpatterns = [
     path('complete_advertiser_profile/', views.complete_advertiser_profile, name='complete_advertiser_profile'),
     path('complete_webmaster_profile/', views.complete_webmaster_profile, name='complete_webmaster_profile'),
     path('profile/', views.profile, name='profile'),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', views.custom_logout, name='logout'),
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),

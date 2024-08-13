@@ -2,6 +2,7 @@ from django.db import models
 from user_accounts.models import Advertiser
 from django.core.exceptions import ValidationError
 
+
 class PartnerCard(models.Model):
     advertiser = models.OneToOneField(Advertiser, on_delete=models.CASCADE, related_name='partner_card')
     logo = models.ImageField(upload_to='partner_logos/', blank=True, null=True, verbose_name='Логотип')
@@ -11,7 +12,7 @@ class PartnerCard(models.Model):
     website = models.URLField(verbose_name='Ссылка на официальный сайт')
     legal_address = models.CharField(max_length=255, verbose_name='Юридический адрес')
     actual_addresses = models.TextField(verbose_name='Фактический адрес')
-    company_details = models.TextField(verbose_name='Реквизиты компании', blank=True, null=True,)
+    company_details = models.TextField(verbose_name='Реквизиты компании', blank=True, null=True, )
     contracts = models.FileField(upload_to='contracts/', blank=True, null=True,
                                  verbose_name='Договор, акты, доп. соглашения')
     main_phone = models.CharField(max_length=20, verbose_name='Телефон основной')
@@ -23,7 +24,7 @@ class PartnerCard(models.Model):
             raise ValidationError("Необходимо указать депозит для одобренной карточки партнера.")
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

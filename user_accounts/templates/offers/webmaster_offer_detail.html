@@ -24,10 +24,11 @@
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
                 <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
                 <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
-                <p><strong>Токен:</strong> {{ offer.unique_token }}</p>
+                <p><strong>Токен:</strong> {{ offer_webmaster.unique_token }}</p>
                 <p><strong>Документация по внедрению пост-запроса:</strong> <a href="http://127.0.0.1:8000/api/docs/#tag/Leads/operation/leads_create">Ссылка на документацию</a></p>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

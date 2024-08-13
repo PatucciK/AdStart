@@ -7,8 +7,9 @@ from rest_framework.throttling import AnonRateThrottle
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from .models import LeadWall
-from .serializers import LeadWallSerializer, LeadUpdateSerializer, LeadSerializer
+from .models import LeadWall, Offer
+from .serializers import LeadWallSerializer, LeadUpdateSerializer, LeadSerializer, OfferUpdateSerializer, \
+    OfferCreateSerializer, OfferSerializer
 
 
 class LeadWallAPIView(APIView):
@@ -54,13 +55,14 @@ class LeadWallAPIView(APIView):
                 }
             )
         },
-        tags=['Leads'],
+        tags=['Лиды'],
         operation_summary="Создание нового лида",
         examples={
             'application/json': {
                 "unique_token": "123e4567-e89b-12d3-a456-426614174000",
                 "name": "Иван Иванов",
-                "phone": "+79991234567"
+                "phone": "+79991234567",
+                "description": "Тестовое описание"
             }
         },
     )
@@ -70,17 +72,13 @@ class LeadWallAPIView(APIView):
 
         **Описание:**
         - Проверяет уникальность номера телефона для оффера.
-        - Переводит статус оффера в "Активен", если он был "Регистрация".
-        - Создает или использует оффер "AdStart", если текущий оффер в статусе "Пауза" или "СТОП".
-
-        **Примечание:** Защита от спама реализована через ограничение скорости запросов.
+        - Добавляет "[Создан через API]" в описание.
         """
         serializer = LeadWallSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({"detail": "Лид успешно создан."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LeadListView(APIView):
     @swagger_auto_schema(
@@ -92,7 +90,7 @@ class LeadListView(APIView):
             openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя",
                               type=openapi.TYPE_STRING),
         ],
-        tags=['Leads'],
+        tags=['Лиды'],
         operation_summary="Получение всех лидов рекламодателя"
     )
     def get(self, request):
@@ -103,7 +101,7 @@ class LeadListView(APIView):
         if user is not None and user.is_authenticated:
             advertiser = getattr(user, 'advertiser', None)
             if advertiser is not None:
-                leads = LeadWall.objects.filter(offer__partner_card__advertiser=advertiser)
+                leads = LeadWall.objects.filter(offer_webmaster__offer__partner_card__advertiser=advertiser)
                 serializer = LeadSerializer(leads, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({"detail": "Рекламодатель не найден."}, status=status.HTTP_404_NOT_FOUND)
@@ -113,17 +111,30 @@ class LeadListView(APIView):
 
 class LeadUpdateView(APIView):
     @swagger_auto_schema(
-        operation_description="Обновить статус лида по логину и паролю рекламодателя",
+        operation_description="Обновить статус обработки лида по логину и паролю рекламодателя:"
+                              "\nПринимаются статусы: 'no_response' - Нет ответа; "
+                              "'callback' - Перезвонить;"
+                              "'appointment' - Запись на прием; 'visit' - Визит;"
+                              " 'rejected' - Отказано.",
+
         request_body=LeadUpdateSerializer,
-        responses={200: "Статус успешно обновлен."},
+        responses={200: openapi.Response(
+            description="Статус успешно обновлен.",
+            examples={
+                'application/json': {
+                    "detail": "Статус успешно обновлен.",
+                    "status": "paid"  # Пример основного статуса, который будет возвращаться
+                }
+            }
+        )},
         manual_parameters=[
             openapi.Parameter('username', openapi.IN_QUERY, description="Логин рекламодателя",
                               type=openapi.TYPE_STRING),
             openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя",
                               type=openapi.TYPE_STRING),
         ],
-        tags=['Leads'],
-        operation_summary="Обновление статуса лида"
+        tags=['Лиды'],
+        operation_summary="Обновление статуса обработки лида"
     )
     def put(self, request):
         username = request.query_params.get('username')
@@ -136,19 +147,131 @@ class LeadUpdateView(APIView):
                 serializer = LeadUpdateSerializer(data=request.data)
                 if serializer.is_valid():
                     lead_id = serializer.validated_data['lead_id']
-                    new_status = serializer.validated_data['status']
+                    new_processing_status = serializer.validated_data['processing_status']
 
-                    lead = LeadWall.objects.filter(id=lead_id, offer__partner_card__advertiser=advertiser).first()
+                    lead = LeadWall.objects.filter(id=lead_id,
+                                                   offer_webmaster__offer__partner_card__advertiser=advertiser).first()
                     if lead:
-                        if lead.can_change_to(new_status):
-                            lead.status = new_status
+                        # Разрешить изменение статуса обработки только если текущий статус обработки - 'new' или 'no_response'
+                        if lead.processing_status in ['new', 'no_response'] and lead.can_change_to(new_processing_status):
+                            lead.processing_status = new_processing_status
+
+                            # Обновление основного статуса в зависимости от статуса обработки
+                            if new_processing_status in ['callback', 'appointment', 'visit']:
+                                lead.status = 'paid'
+                                lead.offer_webmaster.offer.partner_card.deposit -= lead.offer_webmaster.offer.lead_price
+                                lead.offer_webmaster.offer.partner_card.save()
+
+                            elif new_processing_status == 'rejected':
+                                lead.status = 'cancelled'
+
                             lead.save()
-                            return Response({"detail": "Статус успешно обновлен."}, status=status.HTTP_200_OK)
-                        return Response({"detail": "Нельзя изменить на этот статус."},
-                                        status=status.HTTP_400_BAD_REQUEST)
+                            return Response({"detail": "Статус успешно обновлен.", "status": lead.status},
+                                            status=status.HTTP_200_OK)
+                        else:
+                            return Response({"detail": "Изменение возможно только для статусов 'Новый лид' и 'Нет ответа'."},
+                                            status=status.HTTP_400_BAD_REQUEST)
                     return Response({"detail": "Лид не найден или недоступен."}, status=status.HTTP_404_NOT_FOUND)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"detail": "Рекламодатель не найден."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
+class OfferListView(APIView):
+    @swagger_auto_schema(
+        operation_description="Получить все офферы по логину и паролю рекламодателя",
+        responses={200: OfferSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter('username', openapi.IN_QUERY, description="Логин рекламодателя", type=openapi.TYPE_STRING),
+            openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя", type=openapi.TYPE_STRING),
+        ],
+        tags=['Офферы'],
+        operation_summary="Получение всех офферов рекламодателя"
+    )
+    def get(self, request):
+        username = request.query_params.get('username')
+        password = request.query_params.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None and user.is_authenticated:
+            advertiser = getattr(user, 'advertiser', None)
+            if advertiser is not None:
+                offers = Offer.objects.filter(partner_card__advertiser=advertiser)
+                serializer = OfferSerializer(offers, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"detail": "Рекламодатель не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
+class OfferCreateView(APIView):
+    @swagger_auto_schema(
+        request_body=OfferCreateSerializer,
+        operation_description="Создать новый оффер. Необязательные поля могут быть пропущены.",
+        manual_parameters=[
+            openapi.Parameter('username', openapi.IN_QUERY, description="Логин рекламодателя", type=openapi.TYPE_STRING),
+            openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя", type=openapi.TYPE_STRING),
+        ],
+        responses={
+            201: "Оффер успешно создан.",
+            400: "Ошибка валидации данных.",
+            401: "Неверные учетные данные или недостаточно прав."
+        },
+        tags=['Офферы'],
+        operation_summary="Создание нового оффера"
+    )
+    def post(self, request, *args, **kwargs):
+        username = request.query_params.get('username')
+        password = request.query_params.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None and user.is_authenticated:
+            advertiser = getattr(user, 'advertiser', None)
+            if advertiser is not None and advertiser.partner_card:
+                serializer = OfferCreateSerializer(data=request.data)
+                if serializer.is_valid():
+                    offer = serializer.save(partner_card=advertiser.partner_card, status='registered')
+                    return Response({"detail": "Оффер успешно создан.", "offer_id": offer.id}, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "У рекламодателя нет партнерской карты."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
+class OfferUpdateView(APIView):
+    @swagger_auto_schema(
+        request_body=OfferUpdateSerializer,
+        operation_description="Обновить статус оффера по логину и паролю рекламодателя",
+        manual_parameters=[
+            openapi.Parameter('username', openapi.IN_QUERY, description="Логин рекламодателя", type=openapi.TYPE_STRING),
+            openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя", type=openapi.TYPE_STRING),
+            openapi.Parameter('offer_id', openapi.IN_PATH, description="ID оффера", type=openapi.TYPE_INTEGER),
+        ],
+        responses={
+            200: "Статус оффера успешно обновлен.",
+            400: "Ошибка валидации данных.",
+            401: "Неверные учетные данные или недостаточно прав."
+        },
+        tags=['Офферы'],
+        operation_summary="Обновление статуса оффера"
+    )
+    def put(self, request, offer_id, *args, **kwargs):
+        username = request.query_params.get('username')
+        password = request.query_params.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None and user.is_authenticated:
+            advertiser = getattr(user, 'advertiser', None)
+            if advertiser is not None:
+                offer = Offer.objects.filter(id=offer_id, partner_card__advertiser=advertiser).first()
+                if offer:
+                    serializer = OfferUpdateSerializer(offer, data=request.data, partial=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response({"detail": "Статус оффера успешно обновлен."}, status=status.HTTP_200_OK)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Оффер не найден или недоступен."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+

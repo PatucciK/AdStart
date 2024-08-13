@@ -1,0 +1,64 @@
+<!-- templates/statistics/advertiser_financial_statistics.html -->
+{% extends "base.html" %}
+{% block title %}Финансовая Статистика{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <h2 class="my-4 text-center">Финансовая Статистика</h2>
+
+        <!-- Фильтры -->
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="offer_id">Оффер</label>
+                    <select id="offer_id" name="offer_id" class="form-control">
+                        <option value="">Все офферы</option>
+                        {% for offer in offers %}
+                        <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="start_date">Дата от</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date">Дата до</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Фильтровать</button>
+            </div>
+        </form>
+
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Оффер</th>
+                    <th>Вебмастер</th>
+                    <th>Принятые лиды</th>
+                    <th>Потрачено</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in financial_stats %}
+                <tr>
+                    <td>
+                        {% if stat.offer_webmaster__offer__id %}
+                            <a href="{% url 'offer_detail' stat.offer_webmaster__offer__id %}">{{ stat.offer_webmaster__offer__name }}</a>
+                        {% else %}
+                            {{ stat.offer_webmaster__offer__name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ stat.offer_webmaster__webmaster__user__username }}</td>
+                    <td>{{ stat.accepted_leads }}</td>
+                    <td>{{ stat.spent }} руб.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
