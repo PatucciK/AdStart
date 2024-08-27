@@ -7,7 +7,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from offers.apiview import LeadWallAPIView, LeadListView, LeadUpdateView, OfferListView, OfferCreateView, \
-    OfferUpdateView
+    OfferUpdateView, ClickAPIView
 from partner_cards.apiview import CreatePartnerCardAPIView
 from user_accounts.apiview import CreateAdvertiserAPIView, CreateWebmasterAPIView
 
@@ -48,6 +48,7 @@ urlpatterns += [
     path('api/create-partner-card/', CreatePartnerCardAPIView.as_view(), name='create-partner-card'),
     path('api/offers/', OfferListView.as_view(), name='offer-list'),
     path('api/offers/create/', OfferCreateView.as_view(), name='offer-create'),
-    path('api/offers/<int:offer_id>/update/', OfferUpdateView.as_view(), name='offer-update')
+    path('api/offers/<int:offer_id>/update/', OfferUpdateView.as_view(), name='offer-update'),
+    path('api/leads/click',ClickAPIView.as_view(), name='offer-click-create')
 
 ]

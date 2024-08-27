@@ -53,6 +53,7 @@ class OfferWebmaster(models.Model):
     unique_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name='Уникальный токен',
                                     help_text='Уникальный токен для определения связи между оффером и вебмастером')
     phone = models.CharField(max_length=15, verbose_name='Номер мобильного телефона')
+    metrika_token = models.CharField(max_length=255, verbose_name='Метрика токен', blank=True, null=True)
 
     def __str__(self):
         return f'{self.offer.name} - {self.webmaster.user.username}'
@@ -84,12 +85,22 @@ class LeadWall(models.Model):
 
     offer_webmaster = models.ForeignKey(OfferWebmaster, on_delete=models.CASCADE, related_name='leads',
                                         verbose_name='Оффер-Вебмастер')
-    name = models.CharField(max_length=255, verbose_name='Имя пользователя')
-    description = models.TextField(blank=True, null=True, verbose_name='Дополнительное поле')
+    name = models.CharField(max_length=255, verbose_name='Имя пользователя', blank=True, null=True)
+    description = models.TextField(blank=True, null=True, verbose_name='Описание')
+    description_extra = models.TextField(blank=True, null=True, verbose_name='Дополнительно')
     processing_status = models.CharField(max_length=20, choices=PROCESSING_STATUS_CHOICES, default='new', verbose_name='Статус обработки')
     status = models.CharField(max_length=20, choices=LEAD_STATUS_CHOICES, default='on_hold', verbose_name='Статус')
     phone = models.CharField(max_length=15, verbose_name='Номер мобильного телефона')
+    sub_1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 1')
+    sub_2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 2')
+    sub_3 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 3')
+    sub_4 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 4')
+    sub_5 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 5')
+    ip_adress = models.CharField(max_length=100, verbose_name="IP адрес отправителя", blank=True, null=True)
+    domain = models.CharField(max_length=100, verbose_name="Доменное имя отправителя", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    update_at = models.DateTimeField(verbose_name='Дата обновления', blank=True, null=True)
+
 
     def __str__(self):
         return f'{self.name} - {self.status}'
@@ -108,3 +119,23 @@ class LeadWall(models.Model):
     class Meta:
         verbose_name = 'Лидвол'
         verbose_name_plural = 'Лидволы'
+
+class Click(models.Model):
+    offer_webmaster = models.ForeignKey(OfferWebmaster, on_delete=models.CASCADE, related_name='clicks',
+                                        verbose_name='Оффер-Вебмастер')
+    created_at = models.DateTimeField(verbose_name="Время трекинга клика", auto_now_add=True)
+    click_data = models.TextField(verbose_name="Данные о клиенте", blank=True, null=True)
+    sub_1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 1')
+    sub_2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 2')
+    sub_3 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 3')
+    sub_4 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 4')
+    sub_5 = models.CharField(max_length=255, blank=True, null=True, verbose_name='Sub 5')
+    ip_adress = models.CharField(max_length=100, verbose_name="IP адрес отправителя", blank=True, null=True)
+    domain = models.CharField(max_length=100, verbose_name="Доменное имя отправителя", blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.offer_webmaster}"
+
+    class Meta:
+        verbose_name = 'Клик'
+        verbose_name_plural = 'Клики'
