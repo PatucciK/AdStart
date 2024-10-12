@@ -1,8 +1,11 @@
 from django.db import models
 from partner_cards.models import PartnerCard
 from user_accounts.models import Webmaster
+from django.contrib.auth.models import User
 from datetime import date
 import uuid
+import os
+from git import Repo
 
 class Offer(models.Model):
     STATUS_CHOICES = [
@@ -45,6 +48,76 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Оффер'
         verbose_name_plural = 'Офферы'
+
+
+
+class OfferArchive(models.Model):
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='archives')
+    repo_url = models.URLField(max_length=255, verbose_name='URL репозитория')
+    branch = models.CharField(max_length=255, verbose_name='Ветка репозитория', default='main')
+    cloned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата клонирования')
+    last_update = models.DateTimeField(auto_now=True, verbose_name='Последнее обновление')
+    local_repo_path = models.CharField(max_length=255, blank=True, null=True, verbose_name='Путь к локальному репозиторию')
+    last_commit_hash = models.CharField(max_length=40, blank=True, null=True, verbose_name='Хеш последнего коммита')
+
+    def __str__(self):
+        return f"Archive for {self.offer.name}"
+
+    def save(self, *args, **kwargs):
+        # Устанавливаем путь к локальному репозиторию
+        if not self.local_repo_path:
+            self.local_repo_path = os.path.join(settings.BASE_DIR, 'archives', f'{self.offer.id}')
+
+        # Если репозиторий уже существует, проверяем изменения
+        if os.path.exists(self.local_repo_path):
+            if self.check_for_updates():
+                self.update_repository()
+        else:
+            self.clone_repository()
+
+        super().save(*args, **kwargs)
+
+    def clone_repository(self):
+        """Клонируем репозиторий с GitHub."""
+        try:
+            repo = Repo.clone_from(self.repo_url, self.local_repo_path, branch=self.branch)
+            self.last_commit_hash = repo.head.commit.hexsha  # Сохраняем хеш последнего коммита
+            print(f'Repository {self.repo_url} cloned successfully.')
+        except Exception as e:
+            print(f'Error while cloning repository: {e}')
+
+    def check_for_updates(self):
+        """Проверяем, есть ли изменения в удаленном репозитории."""
+        try:
+            repo = Repo(self.local_repo_path)
+            origin = repo.remotes.origin
+            origin.fetch()  # Получаем информацию об изменениях без обновления
+            remote_commit_hash = origin.refs[self.branch].commit.hexsha  # Хеш последнего коммита на удаленной ветке
+
+            if remote_commit_hash != self.last_commit_hash:
+                print(f'New changes detected in {self.repo_url}.')
+                return True
+            else:
+                print(f'No changes in {self.repo_url}.')
+                return False
+        except Exception as e:
+            print(f'Error while checking for updates: {e}')
+            return False
+
+    def update_repository(self):
+        """Обновляем репозиторий с GitHub только если есть изменения."""
+        try:
+            repo = Repo(self.local_repo_path)
+            repo.git.checkout(self.branch)
+            repo.remotes.origin.pull()
+            self.last_commit_hash = repo.head.commit.hexsha  # Обновляем хеш последнего коммита
+            print(f'Repository {self.repo_url} updated successfully.')
+        except Exception as e:
+            print(f'Error while updating repository: {e}')
+
+    class Meta:
+        verbose_name = 'Архив оффера'
+        verbose_name_plural = 'Архивы офферов'
 
 
 class OfferWebmaster(models.Model):
@@ -99,7 +172,8 @@ class LeadWall(models.Model):
     ip_adress = models.CharField(max_length=100, verbose_name="IP адрес отправителя", blank=True, null=True)
     domain = models.CharField(max_length=100, verbose_name="Доменное имя отправителя", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    update_at = models.DateTimeField(verbose_name='Дата обновления', blank=True, null=True)
+    update_at = models.DateTimeField(verbose_name='Дата обновления', auto_now=True)
+
 
 
     def __str__(self):
@@ -133,9 +207,24 @@ class Click(models.Model):
     ip_adress = models.CharField(max_length=100, verbose_name="IP адрес отправителя", blank=True, null=True)
     domain = models.CharField(max_length=100, verbose_name="Доменное имя отправителя", blank=True, null=True)
 
+
     def __str__(self):
         return f"{self.offer_webmaster}"
 
     class Meta:
         verbose_name = 'Клик'
         verbose_name_plural = 'Клики'
+
+
+class LeadComment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments', verbose_name='Пользователь')
+    lead = models.ForeignKey(LeadWall, on_delete=models.CASCADE, related_name='comments', verbose_name='Лид')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    text = models.TextField(verbose_name='Текст комментария')
+
+    def __str__(self):
+        return f"Комментарий от {self.user.username} для лида {self.lead.id}"
+
+    class Meta:
+        verbose_name = 'Комментарий к лиду'
+        verbose_name_plural = 'Комментарии к лидам'

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Добавить ключ Яндекс Метрики{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="my-4 text-center">Добавить ключ Яндекс Метрики</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                    <a href="{% url 'webmaster_offer_detail' object.offer.id %}" class="btn btn-secondary">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

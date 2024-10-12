@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load custom_tags %}
-{% block title %}Лиды вебмастера{% endblock %}
+{% block title %}Клики вебмастера{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <h2 class="my-4 text-center">Лиды вебмастера</h2>
+        <h2 class="my-4 text-center">Клики вебмастера</h2>
         <form method="get" class="mb-4">
             <div class="card p-3">
                 <div class="row">
@@ -18,15 +18,6 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <label for="status" class="form-label">Статус</label>
-                        <select id="status" name="status" class="form-select form-select-sm">
-                            <option value="">Все статусы</option>
-                            {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
-                            <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
                         <label for="start_date" class="form-label">Дата от</label>
                         <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
                     </div>
@@ -34,7 +25,6 @@
                         <label for="end_date" class="form-label">Дата до</label>
                         <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
                     </div>
-
                     <!-- Добавляем фильтры для sub_1...sub_5 -->
                     <div class="col-md-3 mb-2">
                         <label for="sub_1" class="form-label">Sub 1</label>
@@ -63,70 +53,32 @@
             </div>
         </form>
 
-        <table class="table table-striped table-hover table-sm" style="font-size: 0.7em;">
+        <table class="table table-striped table-hover table-sm" style="font-size: 0.875em;">
             <thead class="thead-dark">
                 <tr>
                     <th>Домен</th>
-                    <th>ID</th>
-                    <th>Имя</th>
-                    <th>Телефон</th>
                     <th>IP (геопозиция)</th>
-                    <th>Описание</th>
-                    <th>Дополнительно</th>
-                    <th>Состояние</th>
-                    <th>Статус обработки</th>
-                    <th>Оффер</th>
+                    <th>Дата клика</th>
                     <th>Sub 1</th>
                     <th>Sub 2</th>
                     <th>Sub 3</th>
                     <th>Sub 4</th>
                     <th>Sub 5</th>
-                    <th>Дата создания</th>
-                    <th>Дата изменения статуса</th>
-                    <th>Комментарий</th>
+                    <th>Данные о клиенте</th>
                 </tr>
             </thead>
             <tbody>
-                {% for lead in page_obj %}
-                <tr class="{% if lead.status == 'on_hold' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
-                    <td>{{ lead.domain|default_if_none:"" }}</td>
-                    <td>{{ lead.id }}</td>
-                    <td>{{ lead.name|default_if_none:"" }}</td>
-                    <td>{{ lead.phone|default_if_none:"" }}</td>
-                    <td>{{ lead.ip_adress|default_if_none:"" }} {% if lead.ip_adress %}( {{ lead.ip_adress|get_geolocation }} ){% endif %}</td>
-                    <td>{{ lead.description|default_if_none:""|truncatewords:50 }}</td>
-                    <td>{{ lead.description_extra|default_if_none:""|truncatewords:50 }}</td>
-                    <td>{{ lead.get_status_display }}</td>
-                    <td>{{ lead.get_processing_status_display }}</td>
-                    <td>
-                        <a href="{% url 'webmaster_offer_detail' lead.offer_webmaster.offer.id %}">
-                            {{ lead.offer_webmaster.offer.name|default_if_none:"" }}
-                        </a>
-                    </td>
-                    <td>{{ lead.sub_1|default_if_none:"" }}</td>
-                    <td>{{ lead.sub_2|default_if_none:"" }}</td>
-                    <td>{{ lead.sub_3|default_if_none:"" }}</td>
-                    <td>{{ lead.sub_4|default_if_none:"" }}</td>
-                    <td>{{ lead.sub_5|default_if_none:"" }}</td>
-                    <td>{{ lead.created_at|date:"d.m.Y" }}</td>
-                    <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
-                    <td>
-                        {% if lead.comments.last %}
-                        <p><strong>{{ lead.comments.last.user.username }}</strong> ({{ lead.comments.last.created_at|date:"d.m.Y H:i:s" }}):</p>
-                        <p>{{ lead.comments.last.text }}</p>
-                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}">Посмотреть все комментарии</button>
-                        <div class="all-comments" id="all-comments-{{ lead.id }}" style="display: none;">
-                            {% for comment in lead.comments.all %}
-                            <div>
-                                <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"d.m.Y H:i:s" }}):
-                                <p>{{ comment.text }}</p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <p>Нет комментариев</p>
-                        {% endif %}
-                    </td>
+                {% for click in page_obj %}
+                <tr>
+                    <td>{{ click.domain|default_if_none:"" }}</td>
+                    <td>{{ click.ip_adress|default_if_none:"" }} {% if click.ip_adress %}( {{ click.ip_adress|get_geolocation }} ){% endif %}</td>
+                    <td>{{ click.created_at|date:"d.m.Y H:i:s" }}</td>
+                    <td>{{ click.sub_1|default_if_none:"" }}</td>
+                    <td>{{ click.sub_2|default_if_none:"" }}</td>
+                    <td>{{ click.sub_3|default_if_none:"" }}</td>
+                    <td>{{ click.sub_4|default_if_none:"" }}</td>
+                    <td>{{ click.sub_5|default_if_none:"" }}</td>
+                    <td>{{ click.click_data|default_if_none:""|truncatewords:150 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -170,22 +122,4 @@
         </nav>
     </div>
 </div>
-    <script>
-            document.addEventListener('DOMContentLoaded', function() {
-            const showAllCommentsButtons = document.querySelectorAll('.show-all-comments');
-
-            showAllCommentsButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const leadId = this.getAttribute('data-lead-id');
-                    const commentsDiv = document.getElementById(`all-comments-${leadId}`);
-                    if (commentsDiv.style.display === 'none') {
-                        commentsDiv.style.display = 'block';
-                        this.style.display = 'none'; // Скрываем кнопку после показа всех комментариев
-                    } else {
-                        commentsDiv.style.display = 'none';
-                    }
-                });
-            });
-        });
-    </script>
 {% endblock %}

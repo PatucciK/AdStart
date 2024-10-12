@@ -22,7 +22,7 @@ class Advertiser(models.Model):
     )
 
     def __str__(self):
-        return self.user.email
+        return self.user.username
 
     class Meta:
         verbose_name = 'Рекламодатель'
@@ -67,7 +67,7 @@ class Webmaster(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Баланс', default=0)
 
     def __str__(self):
-        return self.user.email
+        return self.user.username
 
     class Meta:
         verbose_name = 'Вебмастер'

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load custom_tags %}
 {% block title %}Лиды рекламодателя{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
@@ -49,26 +50,33 @@
             </div>
         </form>
 
-        <table class="table table-striped table-hover table-sm">
+        <table class="table table-striped table-hover table-sm" style="font-size: 0.85rem;">
             <thead class="thead-dark">
                 <tr>
+                    <th>Домен</th>
                     <th>ID</th>
                     <th>Имя</th>
                     <th>Телефон</th>
+                    <th>IP (Геопозиция)</th>
                     <th>Описание</th>
+                    <th>Дополнительно</th>
                     <th>Статус обработки</th>
-                    <th>Статус</th>
-                    <th>Оффер</th>
+                    <th>Состояние</th>
                     <th>Дата создания</th>
+                    <th>Дата изменения статуса</th>
+                    <th>Комментарий</th>
                 </tr>
             </thead>
             <tbody>
                 {% for lead in page_obj %}
                 <tr class="{% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}table-warning{% elif lead.processing_status == 'rejected' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
+                    <td>{{ lead.domain }}</td>
                     <td>{{ lead.id }}</td>
                     <td>{{ lead.name }}</td>
                     <td>{{ lead.phone }}</td>
+                    <td>{{ lead.ip_adress }} {% if lead.ip_adress %}({{ lead.ip_adress|get_geolocation }}){% endif %}</td>
                     <td>{{ lead.description|truncatewords:10 }}</td>
+                    <td>{{ lead.description_extra|truncatewords:10 }}</td>
                     <td>
                         {% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}
                         <select class="form-select form-select-sm lead-processing-status" data-lead-id="{{ lead.id }}">
@@ -86,16 +94,31 @@
                         {% endif %}
                     </td>
                     <td>{{ lead.get_status_display }}</td>
-                    <td>
-                        <a href="{% url 'offer_detail' lead.offer_webmaster.offer.id %}">
-                            {{ lead.offer_webmaster.offer.name }}
-                        </a>
-                    </td>
                     <td>{{ lead.created_at|date:"d.m.Y" }}</td>
+                    <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
+                    <td>
+                        {% with latest_comment=lead.comments.last %}
+                        <div>
+                            <strong>{{ latest_comment.user.username }}:</strong> {{ latest_comment.text }} <em>({{ latest_comment.created_at|date:"d.m.Y H:i:s" }})</em>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-link" onclick="showAllComments({{ lead.id }})">Показать все комментарии</button>
+                        </div>
+                        <div id="all-comments-{{ lead.id }}" style="display:none;">
+                            {% for comment in lead.comments.all %}
+                            <div>
+                                <strong>{{ comment.user.username }}:</strong> {{ comment.text }} <em>({{ comment.created_at|date:"d.m.Y H:i:s" }})</em>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <textarea class="form-control add-comment-textarea" data-lead-id="{{ lead.id }}" placeholder="Добавить комментарий"></textarea>
+                        {% endwith %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
 
         <!-- Пагинация -->
         <nav aria-label="Page navigation example">
@@ -137,42 +160,93 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const updateProcessingStatusButtons = document.querySelectorAll('.update-processing-status');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обновление статуса обработки лида
+        const updateProcessingStatusButtons = document.querySelectorAll('.update-processing-status');
 
-    updateProcessingStatusButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const leadId = this.getAttribute('data-lead-id');
-            const selectElement = document.querySelector(`select[data-lead-id="${leadId}"]`);
-            const newProcessingStatus = selectElement.value;
+        updateProcessingStatusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const leadId = this.getAttribute('data-lead-id');
+                const selectElement = document.querySelector(`select[data-lead-id="${leadId}"]`);
+                const newProcessingStatus = selectElement.value;
 
-            fetch("{% url 'advertiser_leads' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: new URLSearchParams({
-                    'lead_id': leadId,
-                    'processing_status': newProcessingStatus
+                fetch("{% url 'advertiser_leads' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        'lead_id': leadId,
+                        'processing_status': newProcessingStatus
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Статус обработки успешно обновлён');
-                    location.reload(); // Перезагрузить страницу после успешного обновления
-                } else {
-                    alert('Ошибка при обновлении статуса обработки: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Ошибка при обновлении статуса обработки');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Статус обработки успешно обновлён');
+                        location.reload(); // Перезагрузить страницу после успешного обновления
+                    } else {
+                        alert('Ошибка при обновлении статуса обработки: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при обновлении статуса обработки');
+                });
             });
         });
-    });
-});
+
+        // Функция для отображения всех комментариев
+        window.showAllComments = function(leadId) {
+            const commentsDiv = document.getElementById(`all-comments-${leadId}`);
+            commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none';
+        };
+
+        // Обработка добавления комментария по нажатию Enter
+        const commentTextareas = document.querySelectorAll('.add-comment-textarea');
+
+        commentTextareas.forEach(textarea => {
+            textarea.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    const leadId = this.getAttribute('data-lead-id');
+                    const text = this.value.trim();
+
+                    if (text) {
+                        fetch("{% url 'add_comment' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: new URLSearchParams({
+                                'lead_id': leadId,
+                                'text': text
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Добавление комментария без перезагрузки страницы
+                                const newComment = document.createElement('div');
+                                newComment.innerHTML = `<strong>${data.comment.user}:</strong> ${data.comment.text} <em>(${data.comment.created_at})</em>`;
+                                textarea.insertAdjacentElement('beforebegin', newComment);
+                                textarea.value = ''; // Очистка поля после добавления
+                            } else {
+                                alert('Ошибка при добавлении комментария: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка при добавлении комментария');
+                        });
+                    }
+                }
+            });
+        });
+    })
 </script>
 {% endblock %}

@@ -1,7 +1,9 @@
+import requests
 from django import template
 from user_accounts.models import Advertiser, Webmaster
 
 register = template.Library()
+
 
 @register.inclusion_tag('user_accounts/menu.html', takes_context=True)
 def load_menu(context):
@@ -25,3 +27,13 @@ def load_menu(context):
         'advertiser_profile': advertiser_profile,
         'webmaster_profile': webmaster_profile,
     }
+
+
+@register.filter
+def get_geolocation(ip):
+    try:
+        response = requests.get(f'http://ipinfo.io/{ip}/json')
+        data = response.json()
+        return f"{data.get('city', '')}, {data.get('region', '')}, {data.get('country', '')}"
+    except Exception:
+        return "Unknown Location"

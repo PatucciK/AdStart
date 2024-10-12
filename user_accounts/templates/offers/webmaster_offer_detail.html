@@ -7,6 +7,7 @@
         <h2 class="my-4 text-center">{{ offer.name }}</h2>
         <div class="card">
             <div class="card-body">
+                <!-- Логотип компании -->
                 <p><strong>Логотип:</strong>
                     {% if offer.partner_card.logo %}
                         <img src="{{ offer.partner_card.logo.url }}" alt="{{ offer.name }}" width="100">
@@ -14,21 +15,72 @@
                         нет лого
                     {% endif %}
                 </p>
+
+                <!-- Наименование компании -->
                 <p><strong>Наименование компании:</strong> {{ offer.partner_card.name }}</p>
+
+                <!-- Наименование юридического лица -->
                 <p><strong>Наименование юридического лица:</strong> {{ offer.partner_card.legal_name }}</p>
-                <p><strong>Лицензия:</strong> {% if offer.partner_card.license %}<a href="{{ offer.partner_card.license.url }}">Скачать</a>{% else %}Нет{% endif %}</p>
-                <p><strong>Ссылка на официальный сайт:</strong> <a href="{{ offer.partner_card.website }}" target="_blank">{{ offer.partner_card.website }}</a></p>
+
+                <!-- Лицензия -->
+                <p><strong>Лицензия:</strong>
+                    {% if offer.partner_card.license %}
+                        <a href="{{ offer.partner_card.license.url }}">Скачать</a>
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </p>
+
+                <!-- Ссылка на официальный сайт -->
+                <p><strong>Ссылка на официальный сайт:</strong>
+                    <a href="{{ offer.partner_card.website }}" target="_blank">{{ offer.partner_card.website }}</a>
+                </p>
+
+                <!-- Юридический адрес -->
                 <p><strong>Юридический адрес:</strong> {{ offer.partner_card.legal_address }}</p>
+
+                <!-- Фактический адрес -->
                 <p><strong>Фактический адрес:</strong> {{ offer.partner_card.actual_addresses }}</p>
+
+                <!-- Телефон для переадресации -->
                 <p><strong>Телефон для переадресации:</strong> (mts.exolve.buy_number)</p>
+
+                <!-- Режим работы -->
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
+
+                <!-- Описание услуг по офферу -->
                 <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
+
+                <!-- Гео -->
                 <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
+
+                <!-- Уникальный токен -->
                 <p><strong>Токен:</strong> {{ offer_webmaster.unique_token }}</p>
-                <p><strong>Документация по внедрению пост-запроса:</strong> <a href="http://127.0.0.1:8000/api/docs/#tag/Leads/operation/leads_create">Ссылка на документацию</a></p>
+
+                <!-- Документация по внедрению пост-запроса -->
+                <p><strong>Документация по внедрению пост-запроса:</strong>
+                    <a href="http://127.0.0.1:8000/api/docs/#tag/Leads/operation/leads_create">Ссылка на документацию</a>
+                </p>
+
+                <!-- Ключ Яндекс Метрики -->
+                <p><strong>Ключ Яндекс Метрики:</strong>
+                    {% if offer_webmaster.metrika_token %}
+                        {{ offer_webmaster.metrika_token }}
+                    {% else %}
+                        <a href="{% url 'add_metrika_token' offer_webmaster.id %}" class="btn btn-warning">Добавить ключ Метрики</a>
+                    {% endif %}
+                </p>
+
+                <!-- Ссылка на скачивание архива -->
+                <p><strong>Скачать архив:</strong>
+                    {% if archive_download_url %}
+                        <a href="{{ archive_download_url }}" class="btn btn-primary">Скачать архив</a>
+                    {% else %}
+                        Архив недоступен
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-

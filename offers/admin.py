@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Offer, LeadWall, OfferWebmaster
+from .models import Offer, LeadWall, OfferWebmaster, Click
 
 
 @admin.register(Offer)
@@ -40,3 +40,9 @@ class LeadWallAdmin(admin.ModelAdmin):
 class OfferWebmasterAdmin(admin.ModelAdmin):
     list_display = ('offer', 'webmaster', 'unique_token')
     search_fields = ('offer__name', 'webmaster__name', 'unique_token')
+
+@admin.register(Click)
+class OfferClickAdmin(admin.ModelAdmin):
+    list_display = ('offer_webmaster', 'created_at')
+
+

@@ -10,7 +10,6 @@ class PartnerCardAdmin(admin.ModelAdmin):
     list_display = ('name', 'legal_name', 'advertiser', 'main_phone', 'deposit', 'is_approved')
     search_fields = ('name', 'legal_name', 'advertiser__user__email')
     list_filter = ('advertiser', 'is_approved')
-    readonly_fields = ('advertiser',)  # Это будет использоваться для существующих записей
 
     def get_readonly_fields(self, request, obj=None):
         if not request.user.is_superuser:

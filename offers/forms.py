@@ -1,5 +1,5 @@
 from django import forms
-from .models import Offer
+from .models import Offer, OfferWebmaster
 
 
 class OfferForm(forms.ModelForm):
@@ -39,3 +39,15 @@ class OfferForm(forms.ModelForm):
             cleaned_data['lead_price'] = None  # Администратор назначает цену
 
         return cleaned_data
+
+
+class OfferWebmasterForm(forms.ModelForm):
+    class Meta:
+        model = OfferWebmaster
+        fields = ['metrika_token']
+        labels = {
+            'metrika_token': 'Ключ Яндекс Метрики',
+        }
+        widgets = {
+            'metrika_token': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите ключ Яндекс Метрики'}),
+        }
