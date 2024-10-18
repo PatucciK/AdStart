@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-%)=nwy56a0w0nb$t0zg%)ghc@t#j$+qr&ieckp375v7de$_f9b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["212.67.14.251", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # Application definition
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'user_accounts',
     'rest_framework',
     'drf_yasg',
+    'ckeditor',
     'content',
     'partner_cards',
     'offers',
@@ -71,6 +72,25 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+   },
+}
 
 ROOT_URLCONF = 'AdStart.urls'
 
@@ -172,8 +192,4 @@ SWAGGER_SETTINGS = {
     },
     'USE_SESSION_AUTH': False,
 }
-
-
-
-
 

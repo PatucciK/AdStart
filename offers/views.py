@@ -120,6 +120,16 @@ class AvailableOffersView(LoginRequiredMixin, ListView):
         # Добавьте сортировку здесь
         return Offer.objects.filter(public_status='public', status='registered').order_by('-id')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем кастомные данные в контекст
+        try:
+            webmaster = get_object_or_404(Webmaster, user=self.request.user)
+            context['my_offers_count'] = Offer.objects.filter(webmaster_links__webmaster=webmaster).count()
+        except Http404:
+            context['my_offers_count'] = ''
+
+        return context
 
 class MyOffersView(LoginRequiredMixin, ListView):
     model = Offer
@@ -131,6 +141,13 @@ class MyOffersView(LoginRequiredMixin, ListView):
         webmaster = get_object_or_404(Webmaster, user=self.request.user)
         return Offer.objects.filter(webmaster_links__webmaster=webmaster)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем кастомные данные в контекст
+        context['all_offers_count'] = Offer.objects.filter(public_status='public', status='registered').count()
+        # return Offer.objects.filter(public_status='public', status='registered').count()
+        return context
+
 
 @login_required
 def take_offer(request, offer_id):
@@ -139,8 +156,19 @@ def take_offer(request, offer_id):
     # Проверка, что связь еще не создана
     if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
         OfferWebmaster.objects.create(offer=offer, webmaster=webmaster)
-        return redirect('my_offers')
-    return redirect('available_offers')
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required
+def remove_offer(request, offer_id):
+    offer = get_object_or_404(Offer, id=offer_id)
+    webmaster = get_object_or_404(Webmaster, user=request.user)
+    # Проверка, что связь еще не создана
+    if OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
+        OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
@@ -186,17 +214,35 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
         webmaster = get_object_or_404(Webmaster, user=self.request.user)
         queryset = LeadWall.objects.filter(offer_webmaster__webmaster=webmaster).order_by('-id')
 
+        el_id = self.request.GET.get('id')
+
         offer_id = self.request.GET.get('offer_id')
-        status = self.request.GET.get('status')
+        status = self.request.GET.get('lead_status')
+        domain_name = self.request.GET.get('domain_name')
+        name = self.request.GET.get('name')
+        processing_status = self.request.GET.get('precessing_status')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         sub_filters = {f"sub_{i}": self.request.GET.get(f"sub_{i}") for i in range(1, 6)}
 
+        if el_id:
+            queryset = queryset.filter(id=el_id)
+
         if offer_id:
             queryset = queryset.filter(offer_webmaster__offer__id=offer_id)
 
+        if domain_name:
+            queryset = queryset.filter(domain=domain_name)
+
+        if name:
+            queryset = queryset.filter(name=name)
+
+
         if status:
             queryset = queryset.filter(status=status)
+
+        if processing_status:
+            queryset = queryset.filter(processing_status=processing_status)
 
         if start_date:
             queryset = queryset.filter(created_at__gte=start_date)
@@ -239,6 +285,8 @@ def add_comment(request):
     }
 
     return JsonResponse({'success': True, 'comment': comment_data})
+
+
 class AdvertiserLeadsView(LoginRequiredMixin, ListView):
     model = LeadWall
     template_name = 'leads/advertiser_leads.html'
@@ -254,7 +302,6 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
         processing_status = self.request.GET.get('processing_status')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
-
         if offer_id:
             queryset = queryset.filter(offer_webmaster__offer__id=offer_id)
 

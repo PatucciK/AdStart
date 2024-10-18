@@ -2,9 +2,33 @@
 {% extends "base.html" %}
 {% block title %}{{ offer.name }}{% endblock %}
 {% block content %}
+{% load custom_tags %}
+
+
+
+
 <div class="row justify-content-center">
     <div class="col-md-8">
+
         <h2 class="my-4 text-center">{{ offer.name }}</h2>
+
+        {% is_mine offer.id as some_name %}
+        {% if some_name %}
+
+            <form method="post" action="#" class="text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+            </form>
+
+        {% else %}
+
+            <form method="post" action="{% url 'take_offer' offer.id %}" class="text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Взять в работу</button>
+            </form>
+
+        {% endif %}
+        <br>
         <div class="card">
             <div class="card-body">
                 <!-- Логотип компании -->
@@ -49,7 +73,9 @@
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
 
                 <!-- Описание услуг по офферу -->
-                <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
+                <p><strong>Описание услуг по офферу:</strong>
+                    <p>{{ offer.service_description|safe }}</p>
+                </p>
 
                 <!-- Гео -->
                 <p><strong>ГЕО:</strong> {{ offer.geo }}</p>

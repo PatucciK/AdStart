@@ -13,8 +13,7 @@
                 <a href="{% url 'edit_partner_card' %}" class="list-group-item list-group-item-action">Карточка партнера</a>
             {% endif %}
         {% elif webmaster_profile %}
-            <a href="{% url 'available_offers' %}" class="list-group-item list-group-item-action">Все офферы</a>
-            <a href="{% url 'my_offers' %}" class="list-group-item list-group-item-action">Мои офферы</a>
+            <a href="{% url 'available_offers' %}" class="list-group-item list-group-item-action">Офферы</a>
             <a href="{% url 'webmaster_leads' %}" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Лидвол{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
             <a href="{% url 'webmaster_clicks' %}" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Клики{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
             <a href="{% url 'webmaster_offer_statistics' %}" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Статистика{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>

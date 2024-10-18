@@ -6,6 +6,7 @@ from datetime import date
 import uuid
 import os
 from git import Repo
+from ckeditor.fields import RichTextField
 
 class Offer(models.Model):
     STATUS_CHOICES = [
@@ -27,7 +28,7 @@ class Offer(models.Model):
     contract_number = models.CharField(max_length=50, verbose_name='Номер Договора', default='AUTO_GENERATE')
     contract_date = models.DateField(default=date.today, verbose_name='Дата договора')
     working_hours = models.CharField(max_length=255, blank=True, null=True, verbose_name='Режим работы колл-центра')
-    service_description = models.TextField(verbose_name='Описание услуг по офферу')
+    service_description = RichTextField(verbose_name='Описание услуг по офферу')
     geo = models.CharField(max_length=255, blank=True, null=True, verbose_name='ГЕО')
     lead_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за лид', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='registered', verbose_name='Актуальность')

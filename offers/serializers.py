@@ -110,6 +110,10 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
         model = Offer
         fields = ['status']
 
+class OfferDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Offer
+        fields = "__all__"
 
 class ClickSerializer(serializers.Serializer):
     unique_token = serializers.UUIDField(required=True, help_text="Уникальный токен оффера для идентификации")

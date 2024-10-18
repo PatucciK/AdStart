@@ -1,6 +1,8 @@
 import requests
 from django import template
 from user_accounts.models import Advertiser, Webmaster
+from offers.models import OfferWebmaster, Offer
+from django.shortcuts import get_object_or_404
 
 register = template.Library()
 
@@ -37,3 +39,13 @@ def get_geolocation(ip):
         return f"{data.get('city', '')}, {data.get('region', '')}, {data.get('country', '')}"
     except Exception:
         return "Unknown Location"
+
+@register.simple_tag(takes_context=True)
+def is_mine(context, offer_id):
+    # Пример простой функции, которая принимает значение и возвращает результат
+    offer = get_object_or_404(Offer, id=int(offer_id))
+    webmaster = get_object_or_404(Webmaster, user=context['request'].user)
+    # Проверка, что связь еще не создана
+    if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
+        return False
+    return True

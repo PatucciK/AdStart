@@ -5,119 +5,109 @@
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="my-4 text-center">Лиды рекламодателя</h2>
-        <form method="get" class="mb-4">
-            <div class="card p-3">
-                <div class="row">
-                    <div class="col-md-3 mb-2">
-                        <label for="offer_id" class="form-label">Оффер</label>
-                        <select id="offer_id" name="offer_id" class="form-select form-select-sm">
-                            <option value="">Все офферы</option>
-                            {% for offer in offers %}
-                            <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label for="processing_status" class="form-label">Статус обработки</label>
-                        <select id="processing_status" name="processing_status" class="form-select form-select-sm">
-                            <option value="">Все статусы обработки</option>
-                            {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
-                            <option value="{{ status }}" {% if status == request.GET.processing_status %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label for="status" class="form-label">Статус</label>
-                        <select id="status" name="status" class="form-select form-select-sm">
-                            <option value="">Все статусы</option>
-                            {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
-                            <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label for="start_date" class="form-label">Дата от</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label for="end_date" class="form-label">Дата до</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
-                    </div>
-                </div>
-                <div class="text-center mt-3">
-                    <button type="submit" class="btn btn-primary btn-sm">Фильтровать</button>
-                </div>
-            </div>
-        </form>
+        <form method="get" class="mb-4" id="filter-form">
+                <table class="table table-striped table-hover table-sm" style="font-size: 0.85rem;">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Домен</th>
+                        <th>ID</th>
+                        <th>Имя</th>
+                        <th>Телефон</th>
+                        <th>IP (Геопозиция)</th>
+                        <th>Описание</th>
+                        <th>Дополнительно</th>
+                        <th>Статус обработки</th>
+                        <th>Состояние</th>
+                        <th>Дата создания</th>
+                        <th>Дата изменения статуса</th>
+                        <th>Комментарий</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-        <table class="table table-striped table-hover table-sm" style="font-size: 0.85rem;">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Домен</th>
-                    <th>ID</th>
-                    <th>Имя</th>
-                    <th>Телефон</th>
-                    <th>IP (Геопозиция)</th>
-                    <th>Описание</th>
-                    <th>Дополнительно</th>
-                    <th>Статус обработки</th>
-                    <th>Состояние</th>
-                    <th>Дата создания</th>
-                    <th>Дата изменения статуса</th>
-                    <th>Комментарий</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lead in page_obj %}
-                <tr class="{% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}table-warning{% elif lead.processing_status == 'rejected' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
-                    <td>{{ lead.domain }}</td>
-                    <td>{{ lead.id }}</td>
-                    <td>{{ lead.name }}</td>
-                    <td>{{ lead.phone }}</td>
-                    <td>{{ lead.ip_adress }} {% if lead.ip_adress %}({{ lead.ip_adress|get_geolocation }}){% endif %}</td>
-                    <td>{{ lead.description|truncatewords:10 }}</td>
-                    <td>{{ lead.description_extra|truncatewords:10 }}</td>
-                    <td>
-                        {% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}
-                        <select class="form-select form-select-sm lead-processing-status" data-lead-id="{{ lead.id }}">
-                            {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
-                                <option value="{{ status }}" {% if lead.processing_status == status %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <button class="btn btn-primary btn-sm update-processing-status" data-lead-id="{{ lead.id }}">
-                            Сохранить изменения
-                        </button>
-                        {% else %}
-                        {{ lead.get_processing_status_display }}
-                        {% endif %}
-                    </td>
-                    <td>{{ lead.get_status_display }}</td>
-                    <td>{{ lead.created_at|date:"d.m.Y" }}</td>
-                    <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
-                    <td>
-                        {% with latest_comment=lead.comments.last %}
-                        <div>
-                            <strong>{{ latest_comment.user.username }}:</strong> {{ latest_comment.text }} <em>({{ latest_comment.created_at|date:"d.m.Y H:i:s" }})</em>
-                        </div>
-                        <div>
-                            <button class="btn btn-sm btn-link" onclick="showAllComments({{ lead.id }})">Показать все комментарии</button>
-                        </div>
-                        <div id="all-comments-{{ lead.id }}" style="display:none;">
-                            {% for comment in lead.comments.all %}
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <select id="processing_status" name="processing_status" class="form-select form-select-sm">
+                                <option value="">Все статусы обработки</option>
+                                {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
+                                <option value="{{ status }}" {% if status == request.GET.processing_status %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select id="status" name="status" class="form-select form-select-sm">
+                                <option value="">Все статусы</option>
+                                {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
+                                <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
+                        </td>
+                        <td>
+                            <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
+                        </td>
+                    </tr>
+
+                    {% for lead in page_obj %}
+                    <tr class="{% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}table-warning{% elif lead.processing_status == 'rejected' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
+                        <td>{{ lead.domain }}</td>
+                        <td>{{ lead.id }}</td>
+                        <td>{{ lead.name }}</td>
+                        <td>{{ lead.phone }}</td>
+                        <td>{{ lead.ip_adress }} {% if lead.ip_adress %}({{ lead.ip_adress|get_geolocation }}){% endif %}</td>
+                        <td>{{ lead.description|truncatewords:10 }}</td>
+                        <td>{{ lead.description_extra|truncatewords:10 }}</td>
+                        <td>
+                            {% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}
+                            <select class="form-select form-select-sm lead-processing-status" data-lead-id="{{ lead.id }}">
+                                {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
+                                    <option value="{{ status }}" {% if lead.processing_status == status %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-primary btn-sm update-processing-status" data-lead-id="{{ lead.id }}">
+                                Сохранить изменения
+                            </button>
+                            {% else %}
+                            {{ lead.get_processing_status_display }}
+                            {% endif %}
+                        </td>
+                        <td>{{ lead.get_status_display }}</td>
+                        <td>{{ lead.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
+                        <td>
+                            {% with latest_comment=lead.comments.last %}
                             <div>
-                                <strong>{{ comment.user.username }}:</strong> {{ comment.text }} <em>({{ comment.created_at|date:"d.m.Y H:i:s" }})</em>
+                                <strong>{{ latest_comment.user.username }}:</strong> {{ latest_comment.text }} <em>({{ latest_comment.created_at|date:"d.m.Y H:i:s" }})</em>
                             </div>
-                            {% endfor %}
-                        </div>
-                        <textarea class="form-control add-comment-textarea" data-lead-id="{{ lead.id }}" placeholder="Добавить комментарий"></textarea>
-                        {% endwith %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            <div>
+                                <button class="btn btn-sm btn-link" onclick="showAllComments({{ lead.id }})">Показать все комментарии</button>
+                            </div>
+                            <div id="all-comments-{{ lead.id }}" style="display:none;">
+                                {% for comment in lead.comments.all %}
+                                <div>
+                                    <strong>{{ comment.user.username }}:</strong> {{ comment.text }} <em>({{ comment.created_at|date:"d.m.Y H:i:s" }})</em>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <textarea class="form-control add-comment-textarea" data-lead-id="{{ lead.id }}" placeholder="Добавить комментарий"></textarea>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+        </form>
 
 
         <!-- Пагинация -->
@@ -249,4 +239,19 @@
         });
     })
 </script>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Найдем все элементы фильтров в форме
+            const filterForm = document.getElementById('filter-form');
+            const filterElements = filterForm.querySelectorAll('select, input');
+
+            // Добавим обработчик события для каждого элемента формы
+            filterElements.forEach(function(element) {
+                element.addEventListener('change', function() {
+                    // Отправляем форму автоматически при изменении любого фильтра
+                    filterForm.submit();
+                });
+            });
+        });
+    </script>
 {% endblock %}

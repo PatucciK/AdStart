@@ -12,7 +12,7 @@
                 <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
             </div>
             <div class="col-md-3 mb-2">
-                <label for "end_date" class="form-label">Дата до</label>
+                <label for="end_date" class="form-label">Дата до</label>
                 <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
             </div>
             <div class="col-md-3 mb-2">
@@ -41,6 +41,16 @@
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
+
+                <th style="text-align: center">Параметр</th>
+                <th style="text-align: center">Трафик</th>
+                <th colspan="5" style="text-align: center">Конверсии</th>
+                <th colspan="3" style="text-align: center">Коэффициенты</th>
+
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
                 {% if request.GET.all_time %}
                     <th>Оффер</th>
                 {% else %}
@@ -56,8 +66,6 @@
                 <th>EPC (₽)</th>
                 <th>Approve (%)</th>
             </tr>
-        </thead>
-        <tbody>
             {% for stat in offer_stats %}
             <tr>
                 {% if request.GET.all_time %}

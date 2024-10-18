@@ -9,7 +9,7 @@ from drf_yasg import openapi
 
 from .models import LeadWall, Offer
 from .serializers import LeadWallSerializer, LeadUpdateSerializer, LeadSerializer, OfferUpdateSerializer, \
-    OfferCreateSerializer, OfferSerializer, ClickSerializer
+    OfferCreateSerializer, OfferSerializer, ClickSerializer, OfferDeleteSerializer
 
 
 class LeadWallAPIView(APIView):
@@ -207,7 +207,42 @@ class OfferUpdateView(APIView):
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
 
+class OfferDeleteView(APIView):
+    @swagger_auto_schema(
+        request_body=OfferDeleteSerializer,
+        operation_description="Удалить оффер",
+        manual_parameters=[
+            openapi.Parameter('username', openapi.IN_QUERY, description="Логин рекламодателя",
+                              type=openapi.TYPE_STRING),
+            openapi.Parameter('password', openapi.IN_QUERY, description="Пароль рекламодателя",
+                              type=openapi.TYPE_STRING),
+            openapi.Parameter('offer_id', openapi.IN_PATH, description="ID оффера", type=openapi.TYPE_INTEGER),
+        ],
+        responses={
+            200: "Статус оффера успешно удален.",
+            400: "Ошибка валидации данных.",
+            401: "Неверные учетные данные или недостаточно прав."
+        },
+        tags=['Офферы'],
+        operation_summary="Удаление оффера"
+    )
 
+    def delete(self, request, offer_id, *args, **kwargs):
+        username = request.query_params.get('username')
+        password = request.query_params.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None and user.is_authenticated:
+            advertiser = getattr(user, 'advertiser', None)
+
+            if advertiser is not None:
+                offer = Offer.objects.filter(id=offer_id, partner_card__advertiser=advertiser).first()
+                if offer:
+                    offer.delete()
+                    return Response({"detail": "Статус оффера успешно удален."}, status=status.HTTP_200_OK)
+                return Response({"detail": "Оффер не найден или недоступен."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
 
 class ClickAPIView(APIView):
     permission_classes = [AllowAny]

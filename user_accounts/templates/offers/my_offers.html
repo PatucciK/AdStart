@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Мои офферы{% endblock %}
 {% block content %}
+
+<!-- Вкладки -->
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="all-offers-tab" data-bs-toggle="tab" href="{% url 'available_offers' %}" role="tab" aria-controls="all-offers" aria-selected="true">
+        Все
+        <span class="badge-counter">{{ all_offers_count }}</span>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" id="my-offers-tab" data-bs-toggle="tab" href="{% url 'my_offers' %}" role="tab" aria-controls="my-offers" aria-selected="false">
+        Мои офферы
+        <span class="badge-counter">{{ offers|length }}</span>
+      </a>
+    </li>
+  </ul>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="my-4 text-center">Мои офферы</h2>
@@ -12,23 +29,32 @@
                     <th>Название</th>
                     <th>Описание услуг</th>
                     <th>Цена за лид</th>
+                    <th>Действие</th>
                 </tr>
             </thead>
             <tbody>
                 {% for offer in offers %}
-                <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}">
-                    <td>{{ offer.id }}</td>
-                    <td>
-                        {% if offer.logo %}
-                        <img src="{{ offer.logo.url }}" alt="{{ offer.name }}" width="50">
-                        {% else %}
-                        Нет логотипа
-                        {% endif %}
+                    <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}" style="cursor: pointer">
+                        <td>{{ offer.id }}</td>
+                        <td>
+                            {% if offer.logo %}
+                            <img src="{{ offer.logo.url }}" alt="{{ offer.name }}" width="50">
+                            {% else %}
+                            Нет логотипа
+                            {% endif %}
+                        </td>
+                        <td>{{ offer.name }}</td>
+                        <td>{{ offer.service_description|truncatewords:20 }}</td>
+                        <td>{{ offer.lead_price }} руб.</td>
+                        <td>
+
+                        <form method="post" action="{% url 'remove_offer' offer.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        </form>
+
                     </td>
-                    <td>{{ offer.name }}</td>
-                    <td>{{ offer.service_description|truncatewords:20 }}</td>
-                    <td>{{ offer.lead_price }} руб.</td>
-                </tr>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>

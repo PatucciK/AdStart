@@ -11,6 +11,7 @@ from .views import (
     AvailableOffersView,
     MyOffersView,
     take_offer,
+    remove_offer,
     WebmasterOfferDetailView,
     WebmasterLeadsView,
     WebmasterOfferStatisticsView,
@@ -40,6 +41,8 @@ urlpatterns += [
     path('available_offers/', AvailableOffersView.as_view(), name='available_offers'),
     path('my_offers/', MyOffersView.as_view(), name='my_offers'),
     path('take_offer/<int:offer_id>/', take_offer, name='take_offer'),
+    path('remove_offer/<int:offer_id>/', remove_offer, name='remove_offer'),
+
     path('webmaster/<int:pk>/', WebmasterOfferDetailView.as_view(), name='webmaster_offer_detail'),
     path('webmaster/leads/', WebmasterLeadsView.as_view(), name='webmaster_leads'),
     path('advertiser/statistics/offers/', AdvertiserOfferStatisticsView.as_view(), name='advertiser_offer_statistics'),
