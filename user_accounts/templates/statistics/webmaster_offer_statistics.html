@@ -1,62 +1,127 @@
 {% extends "base.html" %}
 {% block title %}Статистика по офферам{% endblock %}
+
+
 {% block content %}
-<div class="container">
+
+<!-- Подключение jQuery -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<div class="container mt-5">
     <h2 class="my-4 text-center">Статистика</h2>
 
     <!-- Фильтры и кнопки -->
-    <form method="get" class="mb-4">
-        <div class="row">
-            <div class="col-md-3 mb-2">
-                <label for="start_date" class="form-label">Дата от</label>
-                <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
+    <form method="get" class="mb-4" id="filterForm">
+        <div class="form-row">
+            <!-- Поле для выбора даты -->
+            <div class="col-md-3">
+                <label for="date" class="form-label">Дата</label>
+                <input type="text" id="date" name="date" class="form-control form-control-sm" value="{{ request.GET.date }}" placeholder="Дата">
             </div>
-            <div class="col-md-3 mb-2">
-                <label for="end_date" class="form-label">Дата до</label>
-                <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
+
+            <!-- Поле для названия потока -->
+            <div class="form-group col-md-3">
+                <label for="flow_name">Название потока</label>
+                <input type="text" class="form-control" id="flow_name" placeholder="Название потока">
             </div>
-            <div class="col-md-3 mb-2">
+
+            <!-- Поле для выбора оффера -->
+            <div class="form-group col-md-3 mx-2">
                 <label for="offer_id" class="form-label">Выберите оффер</label>
-                <select id="offer_id" name="offer_id" class="form-select form-select-sm">
+                <select id="offer_id" name="offer_id" class="form-control w-100 h-75">
                     <option value="">Все офферы</option>
                     {% for offer in offers %}
                     <option value="{{ offer.offer.id }}" {% if offer.offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.offer.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end mb-2">
-                <button type="submit" class="btn btn-primary btn-sm w-100">Применить</button>
+
+            <!-- Sub поля -->
+            <div class="form-group col-md-2">
+                <label for="sub1">Sub #1</label>
+                <input type="text" class="form-control" id="sub1" name="sub1" placeholder="Sub #1">
             </div>
-            <div class="col-md-3 d-flex align-items-end mb-2">
-                {% if request.GET.all_time %}
-                    <a href="?" class="btn btn-secondary btn-sm w-100">По дням</a>
-                {% else %}
-                    <a href="?all_time=1" class="btn btn-secondary btn-sm w-100">За все время</a>
-                {% endif %}
+
+            <div class="form-group col-md-2">
+                <label for="sub2">Sub #2</label>
+                <input type="text" class="form-control" id="sub2" name="sub2" placeholder="Sub #2">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="sub3">Sub #3</label>
+                <input type="text" class="form-control" id="sub3" name="sub3" placeholder="Sub #3">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="sub4">Sub #4</label>
+                <input type="text" class="form-control" id="sub4" name="sub4" placeholder="Sub #4">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="sub5">Sub #5</label>
+                <input type="text" class="form-control" id="sub5" name="sub5" placeholder="Sub #5">
+            </div>
+
+            <div class="form-group col-md-2 text-center">
+                <button type="submit" class="btn btn-primary mx-2 text-center" style="display: inline-block;">
+                    Применить
+                </button>
             </div>
         </div>
     </form>
+    <form method="get" class="mb-4">
+        <div class="container text-center my-5">
+        <div class="row text-center mx-2">
+            <div class="form-group col-md-3">
+                <label for="enter_type">Выводить по</label>
+                <select id="enter_type" name="enter_type" class="form-control h-75">
+                    <option {% if request.GET.enter_type == "by_days" %}selected{% endif %} value="by_days">
+                        По дням
+                    </option>
+                    <option value="by_hour" {% if request.GET.enter_type == "by_hour" %}selected{% endif %}>По часам</option>
+                    <option value="by_week" {% if request.GET.enter_type == "by_week" %}selected{% endif %}>По неделям</option>
+                    <option value="by_month" {% if request.GET.enter_type == "by_month" %}selected{% endif %}>По месяцам</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary mx-2">
+                Применить
+            </button>
+
+            <button class="btn btn-primary mx-2">
+                <a href="?enter_type=by_offer">По офферам</a>
+            </button>
+
+
+        </div>
+    </form>
+
+    </div>
 
     <!-- Таблица статистики -->
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
-
                 <th style="text-align: center">Параметр</th>
                 <th style="text-align: center">Трафик</th>
-                <th colspan="5" style="text-align: center">Конверсии</th>
+                <th colspan="6" style="text-align: center">Конверсии</th>
                 <th colspan="3" style="text-align: center">Коэффициенты</th>
-
+                <th colspan="3" style="text-align: center">Финансы</th>
             </tr>
         </thead>
         <tbody>
         <tr>
-                {% if request.GET.all_time %}
+                {% if request.GET.enter_type %}
                     <th>Оффер</th>
                 {% else %}
                     <th>Дата</th>
                 {% endif %}
+
                 <th>Уники</th>
+                <th>Σ</th>
                 <th>Новые</th>
                 <th>Принято</th>
                 <th>Отклонено</th>
@@ -65,27 +130,66 @@
                 <th>CR (%)</th>
                 <th>EPC (₽)</th>
                 <th>Approve (%)</th>
+                <th>Цена за лид</th>
+                <th>Заработано ₽</th>
+                <th>Холд ₽</th>
             </tr>
             {% for stat in offer_stats %}
             <tr>
-                {% if request.GET.all_time %}
+                {% if request.GET.enter_type == 'by_offer' %}
                     <td>
                         <a href="{% url 'webmaster_offer_detail' stat.offer_webmaster__offer__id %}">{{ stat.offer_webmaster__offer__name }}</a>
                     </td>
+                {% elif request.GET.enter_type == 'by_month' %}
+                    <td>{{ stat.month }}</td>
+
                 {% else %}
                     <td>{{ stat.created_at__date|date:"d.m.Y" }}</td>
                 {% endif %}
-                <td>{{ stat.unique_leads }}</td>
-                <td>{{ stat.new_leads }}</td>
-                <td>{{ stat.approved_leads }}</td>
-                <td>{{ stat.rejected_leads }}</td>
-                <td>{{ stat.trash_leads }}</td>
-                <td>{{ stat.duplicate_leads }}</td>
+
+                <td class="sum_unique_lead">{{ stat.unique_leads }}</td>
+                <td>{{ stat.sum_konv }}</td>
+                <td class="sum_new_leads">{{ stat.new_leads }}</td>
+                <td class="sum_approved_leads">{{ stat.approved_leads }}</td>
+                <td class="sum_rejected_leads">{{ stat.rejected_leads }}</td>
+                <td class="sum_trash_leads">{{ stat.trash_leads }}</td>
+                <td class="sum_duplicate_leads">{{ stat.duplicate_leads }}</td>
                 <td>{{ stat.conversion_rate|floatformat:2 }}</td>
                 <td>{{ stat.epc|floatformat:2 }}</td>
-                <td>{{ stat.approve_percent|floatformat:2 }}</td>
+                <td >{{ stat.approve_percent|floatformat:2 }}</td>
+                <td>{{ stat.offer_webmaster__offer__lead_price }}</td>
+
+                <td class="sum_earned">
+                    {% if stat.earned %}
+                    {{ stat.earned }}
+                    {% else %}
+                    0
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stat.on_hold %}
+                        {{ stat.on_hold }}
+                    {% else %}
+                        0
+                    {% endif %}</td>
             </tr>
             {% endfor %}
+        <tfoot>
+            <tr>
+                <td class="text-right"><strong>Итого:</strong></td>
+                <td id="totalSum_unique_lead"><strong>0</strong></td>
+                <td></td>
+                <td id="totalSum_new_leads"><strong>0</strong></td>
+                <td id="totalSum_approved_leads"><strong>0</strong></td>
+                <td id="totalSum_rejected_leads"><strong>0</strong></td>
+                <td id="totalSum_trash_leads"><strong>0</strong></td>
+                <td id="totalSum_duplicate_leads"><strong>0</strong></td>
+                <td colspan="3"></td>
+                <td></td>
+                <td id="totalSum_earned"><strong>0</strong></td>
+                <td id="totalSum_hold"></td>
+            </tr>
+        </tfoot>
         </tbody>
     </table>
 
@@ -110,4 +214,159 @@
         </ul>
     </nav>
 </div>
+
+<script>
+    $(function() {
+        $('#date').daterangepicker({
+
+            opens: 'left',
+            locale: {
+                format: 'YYYY-MM-DD'  // Устанавливаем формат даты для совместимости с сервером
+            },
+            ranges: {
+                'Все время': [moment('1970-01-01'), moment()],
+                'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Последние 2 дня': [moment().subtract(1, 'days'), moment()],
+                'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+                'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+                'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+                'Прошлый месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+
+
+        });
+    });
+    </script>
+
+<script>
+  // Функция для подсчета суммы
+  function calculateTotal() {
+    let total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_unique_lead').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_unique_lead').textContent = total; 
+
+    total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_new_leads').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_new_leads').textContent = total; 
+
+    total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_approved_leads').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_approved_leads').textContent = total; 
+
+    total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_rejected_leads').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_rejected_leads').textContent = total; 
+
+    total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_trash_leads').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_trash_leads').textContent = total; 
+
+     total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_duplicate_leads').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_duplicate_leads').textContent = total; 
+
+     total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_hold').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_hold').textContent = total;
+
+
+    total = 0;
+    // Проходим по каждой ячейке с классом "sum" и суммируем значения
+    document.querySelectorAll('.sum_earned').forEach(function (element) {
+      // Преобразуем текстовое содержимое ячеек в числа и добавляем к итоговой сумме
+      total += parseInt(element.textContent);
+    });
+
+      // Устанавливаем результат в ячейку итоговой суммы
+    document.getElementById('totalSum_earned').textContent = total;
+
+  }
+
+
+  // Вызываем функцию подсчета при загрузке страницы
+  window.onload = calculateTotal;
+</script>
+
+<script>
+// Функция для добавления, обновления и удаления GET-параметров
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Отключаем стандартное поведение формы
+
+            // Получаем текущее состояние URL и параметров
+            let currentUrl = new URL(window.location);
+            let form = event.target;
+            let formData = new FormData(form);
+
+            // Проходимся по каждому элементу формы
+            for (let [key, value] of formData.entries()) {
+                if (value) {
+                    // Обновляем или добавляем параметр в строку запроса
+                    currentUrl.searchParams.set(key, value);
+                } else {
+                    // Если значение пустое — удаляем параметр из строки запроса
+                    currentUrl.searchParams.delete(key);
+                }
+            }
+
+            // Отправляем GET-запрос с обновленными параметрами
+            window.location.href = currentUrl;  // Редирект на новый URL с параметрами
+        });
+
+        // Функция для загрузки значений из URL в форму
+        window.addEventListener('load', function() {
+            let currentUrl = new URL(window.location);
+            let searchParams = currentUrl.searchParams;
+
+            // Для каждого поля в форме проверяем наличие значения в URL
+            document.querySelectorAll('#filterForm input').forEach(function(input) {
+                let paramValue = searchParams.get(input.name);
+                if (paramValue) {
+                    // Если параметр есть в URL, заполняем поле формы
+                    input.value = paramValue;
+                }
+            });
+        });
+    </script>
 {% endblock %}

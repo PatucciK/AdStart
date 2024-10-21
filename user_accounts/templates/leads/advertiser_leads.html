@@ -26,35 +26,38 @@
                 <tbody>
 
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <select id="processing_status" name="processing_status" class="form-select form-select-sm">
-                                <option value="">Все статусы обработки</option>
-                                {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
-                                <option value="{{ status }}" {% if status == request.GET.processing_status %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            <select id="status" name="status" class="form-select form-select-sm">
-                                <option value="">Все статусы</option>
-                                {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
-                                <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
-                        </td>
-                        <td>
-                            <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
-                        </td>
+                            {% csrf_token %}
+                            <td><input type="text" id="domain_name" name="domain_name" class="form-control form-control-sm" value="{{ request.GET.domain_name }}" placeholder="Домен" style="width:60px"></td>
+                            <td><input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:40px"></td>
+                            <td><input type="text" id="name" name="name" class="form-control form-control-sm" value="{{ request.GET.name }}" placeholder="Имя" style="width:60px"></td>
+                            <td><input type="text" id="phone_number" name="phone_number" class="form-control form-control-sm" value="{{ request.GET.phone_number }}" placeholder="Телефон"></td>
+                            <td><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Геопозиция"></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <select id="lead_status" name="lead_status" class="form-select form-select-sm">
+                                    <option value="">Все статусы</option>
+                                    {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
+                                    <option value="{{ status }}" {% if status == request.GET.lead_status %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select id="precessing_status" name="precessing_status" class="form-select form-select-sm">
+                                    <option value="">Все статусы</option>
+                                    {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
+                                    <option value="{{ status }}" {% if status == request.GET.precessing_status %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <td>
+                                <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
+                            </td>
+                            <td>
+                                <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
+                            </td>
+                            <td></td>
                     </tr>
 
                     {% for lead in page_obj %}
@@ -108,8 +111,6 @@
                 </tbody>
                 </table>
         </form>
-
-
         <!-- Пагинация -->
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center pagination-sm">

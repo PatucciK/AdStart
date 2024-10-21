@@ -2,6 +2,13 @@
 {% load custom_tags %}
 {% block title %}Все доступные офферы{% endblock %}
 {% block content %}
+<!-- Подключение CSS для Choices.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+<!-- Подключение JS для Choices.js -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+
 
 <!-- Вкладки -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -22,13 +29,15 @@
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="my-4 text-center">Все доступные офферы</h2>
-        <table class="table table-striped table-hover table-sm">
+        <form method="get" class="mb-4" id="form-table">
+            {% csrf_token %}
+            <table class="table table-striped table-hover table-sm">
             <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
-                    <th>Логотип</th>
+                    <th>Лого</th>
                     <th>Компания</th>
-                    <th>Название</th>
+                    <th>Оффер</th>
                     <th>Описание</th>
                     <th>Цена за лид</th>
                     <th>Гео</th>
@@ -37,8 +46,44 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+
+                    <td>
+                        <input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:60px">
+
+                    </td>
+                    <td></td>
+                    <td>
+                        <select id="company_name" name="company_name[]" class="form-select form-select-sm" multiple>
+                            {% for company_id, company_name in companies %}
+                            <option value="{{ company_id }}" {% if company_id|stringformat:"s" in select_companies %}selected{% endif %}>{{ company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" id="offer" name="offer" class="form-control form-control-sm" value="{{ request.GET.offer }}" placeholder="Offer"></td>
+                    <td></td>
+                    <td></td>
+                    <td><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Geo"></td>
+                    <td>
+                        <select id="status" name="status" class="form-select form-select-sm">
+                            <option value="">Все статусы</option>
+                            {% for status, label in offers.model.STATUS_CHOICES %}
+                            <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>Действие</td>
+
+                </tr>
+
                 {% for offer in offers %}
-                <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}" style="cursor: pointer">
+<!--                offer_detail-->
+                {% is_mine offer.id as some_name %}
+                    {% if some_name %}
+                        <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}" style="cursor: pointer">
+                    {% else %}
+                        <tr class="clickable-row" data-href="{% url 'offer_detail' offer.id %}" style="cursor: pointer">
+                    {% endif %}
                     <td class="text-center">{{ offer.id }}</td>
                     <td class="text-center">
                         {% if offer.logo %}
@@ -47,9 +92,9 @@
                         Нет логотипа
                         {% endif %}
                     </td>
-                    <td></td>
+                    <td>{% get_partner_name offer.partner_card_id %}</td>
                     <td>{{ offer.name }}</td>
-                    <td>{{ offer.service_description|truncatewords:20 }}</td>
+                    <td>{{ offer.service_description|truncatewords:20|striptags }}</td>
                     <td>{{ offer.lead_price }} руб.</td>
                     <td>{{ offer.geo }}</td>
                     <td>
@@ -81,8 +126,8 @@
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Пагинация -->
+        </form>
+            <!-- Пагинация -->
         {% if is_paginated %}
         <div class="pagination justify-content-center">
             <nav aria-label="Page navigation">
@@ -159,5 +204,31 @@
             });
         });
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Найдем все элементы фильтров в форме
+        const filterForm = document.getElementById('form-table');
+        const filterElements = filterForm.querySelectorAll('select, input');
+
+        // Добавим обработчик события для каждого элемента формы
+        filterElements.forEach(function(element) {
+            element.addEventListener('change', function() {
+                // Отправляем форму автоматически при изменении любого фильтра
+                filterForm.submit();
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const element = document.getElementById('company_name');
+        const choices = new Choices(element, {
+            removeItemButton: true,  // Добавляет возможность удаления выбранных элементов
+            placeholder: true,
+            placeholderValue: 'Choose options'
+        });
+    });
+
 </script>
 {% endblock %}

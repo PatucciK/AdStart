@@ -1,6 +1,7 @@
 import requests
 from django import template
 from user_accounts.models import Advertiser, Webmaster
+from partner_cards.models import PartnerCard
 from offers.models import OfferWebmaster, Offer
 from django.shortcuts import get_object_or_404
 
@@ -49,3 +50,9 @@ def is_mine(context, offer_id):
     if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
         return False
     return True
+
+@register.simple_tag
+def get_partner_name(partner_id):
+    if type(partner_id) == int:
+        return PartnerCard.objects.get(id=partner_id).name
+    return "None"

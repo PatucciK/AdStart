@@ -39,7 +39,8 @@
                     <th>Дата (период)</th>
                     <th>Оффер</th>
                     <th>Принятые лиды</th>
-                    <th>Заработано (руб.)</th>
+                    <th>Заработано ₽</th>
+                    <th>Холд ₽</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,7 +55,17 @@
                         {% endif %}
                     </td>
                     <td>{{ stat.accepted_leads }}</td>
-                    <td>{{ stat.earned }} руб.</td>
+                    <td>{% if stat.earned %}
+                    {{ stat.earned }}
+                    {% else %}
+                    0
+                    {% endif %}</td>
+                    <td>
+                    {% if stat.on_hold %}
+                        {{ stat.on_hold }}
+                    {% else %}
+                        0
+                    {% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

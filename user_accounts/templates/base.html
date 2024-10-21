@@ -28,7 +28,7 @@
         }
         .sidebar {
             position: fixed;
-            top: 60px; /* Adjust based on the height of your navbar */
+            top: 80px; /* Adjust based on the height of your navbar */
             left: 0;
             width: 200px;
             height: 100%;
@@ -38,14 +38,16 @@
         }
         .content {
             margin-left: 220px; /* Adjust based on the width of your sidebar */
-            padding: 20px;
+            padding: 10px;
             overflow: scroll;
         }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">AdStart</a>
+        <a class="navbar-brand" href="#">
+            <img src="/media/admin-interface/logo/Logotype.png" alt="Logo" width="80px">
+        </a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}

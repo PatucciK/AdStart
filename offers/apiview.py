@@ -35,6 +35,7 @@ class LeadWallAPIView(APIView):
             return Response({"detail": "Лид успешно создан."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LeadListView(APIView):
     @swagger_auto_schema(
         operation_description="Получить все лиды по логину и паролю рекламодателя",
@@ -60,7 +61,6 @@ class LeadListView(APIView):
             return Response({"detail": "Рекламодатель не найден."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
-
 
 
 class LeadUpdateView(APIView):
@@ -138,6 +138,7 @@ class OfferListView(APIView):
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class OfferCreateView(APIView):
     @swagger_auto_schema(
         request_body=OfferCreateSerializer,
@@ -170,6 +171,7 @@ class OfferCreateView(APIView):
             return Response({"detail": "У рекламодателя нет партнерской карты."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class OfferUpdateView(APIView):
     @swagger_auto_schema(
@@ -207,6 +209,7 @@ class OfferUpdateView(APIView):
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class OfferDeleteView(APIView):
     @swagger_auto_schema(
         request_body=OfferDeleteSerializer,
@@ -243,6 +246,7 @@ class OfferDeleteView(APIView):
                 return Response({"detail": "Оффер не найден или недоступен."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({"detail": "Неверные учетные данные."}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class ClickAPIView(APIView):
     permission_classes = [AllowAny]

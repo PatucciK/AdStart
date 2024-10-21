@@ -35,31 +35,25 @@
         <table class="table table-striped mt-4">
             <thead>
                 <tr>
-                    <th>Дата</th>
+                    <th>Контрагент</th>
                     <th>Оффер</th>
-                    <th>Уники</th>
-                    <th>Approve (%)</th>
-                    <th>Конверсии: Новые</th>
-                    <th>Конверсии: Принято</th>
-                    <th>Конверсии: Отклонено</th>
+                    <th>Вебмастер</th>
+                    <th>Всего лидов</th>
+                    <th>Апрувнутых лидов</th>
+                    <th>% Апрува</th>
+                    <th>Выплата</th>
+                    <th>Выплата веба</th>
+                    <th>Заработано</th>
+                    <th>Заработано вебом</th>
                 </tr>
             </thead>
             <tbody>
-                {% for stat in offer_stats %}
+                {% for offer in offers %}
+
                 <tr>
-                    <td>{{ stat.created_at|date:"d.m.Y" }}</td>
-                    <td>
-                        {% if stat.offer__id %}
-                            <a href="{% url 'offer_detail' stat.offer__id %}">{{ stat.offer__name }}</a>
-                        {% else %}
-                            {{ stat.offer__name }}
-                        {% endif %}
-                    </td>
-                    <td>{{ stat.unique_leads }}</td>
-                    <td>{{ stat.approve_percent|floatformat:2 }}</td>
-                    <td>{{ stat.new_leads }}</td>
-                    <td>{{ stat.approved_leads }}</td>
-                    <td>{{ stat.rejected_leads }}</td>
+                    <td></td>
+                    <td>{{ offer.name }}</td>
+
                 </tr>
                 {% endfor %}
             </tbody>
