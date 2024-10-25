@@ -17,11 +17,12 @@ from .views import (
     WebmasterOfferStatisticsView,
     WebmasterFinancialStatisticsView,
     AdvertiserOfferStatisticsView,
+    AdminOfferStatisticsView,
     AdvertiserFinancialStatisticsView,
     AdvertiserLeadsView,
     WebmasterClicksView,
     add_comment,
-    download_offer_archive,
+    download_offer_archive, WebmasterTrashLeadsView,
 )
 
 urlpatterns = [
@@ -45,9 +46,15 @@ urlpatterns += [
 
     path('webmaster/<int:pk>/', WebmasterOfferDetailView.as_view(), name='webmaster_offer_detail'),
     path('webmaster/leads/', WebmasterLeadsView.as_view(), name='webmaster_leads'),
+    path('webmaster/leads/trash', WebmasterTrashLeadsView.as_view(), name='webmaster_trash_leads'),
+
+
     path('advertiser/statistics/offers/', AdvertiserOfferStatisticsView.as_view(), name='advertiser_offer_statistics'),
     path('advertiser/statistics/financial/', AdvertiserFinancialStatisticsView.as_view(),
          name='advertiser_financial_statistics'),
+
+    path('admin/statistics/offers/', AdminOfferStatisticsView.as_view(), name='admin_offer_statistics'),
+
     path('advertiser/leads/', AdvertiserLeadsView.as_view(), name='advertiser_leads'),
     path('add-comment/', add_comment, name='add_comment'),
 

@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Финансовая Статистика{% endblock %}
+
+{% block page_title %}
+    <h2 class="text-center my-4">Финансовая Статистика</h2>
+{% endblock %}
+
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <h2 class="my-4 text-center">Финансовая Статистика</h2>
 
         <!-- Фильтры -->
         <form method="get" class="mb-4">
@@ -69,6 +74,16 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Итого</strong></td>
+                    <td></td>
+                    <td><strong>{{ result.res_accepted_leads }}</strong></td>
+                    <td> <strong>{{ result.res_earned }}</strong></td>
+                    <td><strong>{{ result.res_hold }}</strong></td>
+                </tr>
+            </tfoot>
+
         </table>
 
         <!-- Пагинация -->

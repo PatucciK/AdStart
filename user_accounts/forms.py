@@ -26,16 +26,18 @@ class EmailConfirmationForm(forms.Form):
 class AdvertiserProfileForm(forms.ModelForm):
     class Meta:
         model = Advertiser
-        fields = ['telegram', 'phone']
+        fields = ['telegram', 'phone', 'about']
         widgets = {
             'telegram': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'about': forms.Textarea(attrs={'class': 'form-control'}),
         }
         labels = {
             'telegram': 'Телеграм для связи с рекламодателем (наш менеджер свяжется с вами в Telegram для '
                         'подтверждения регистрации)',
             'phone': 'Телефон для связи с рекламодателем прямой (наш менеджер свяжется с вами для подтверждения '
                      'регистрации)',
+            'about': 'Опишите вашу услугу'
         }
 
 

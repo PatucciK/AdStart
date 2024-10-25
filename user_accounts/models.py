@@ -21,6 +21,14 @@ class Advertiser(models.Model):
         help_text='Телефон рекламодателя'
     )
 
+    about = models.TextField(
+        max_length=500,
+        blank=True,
+        null=False,
+        verbose_name='Описание услуги',
+        help_text='Описание услуги'
+    )
+
     def __str__(self):
         return self.user.username
 

@@ -25,6 +25,12 @@ from django.db import models, transaction
 from django.core.paginator import Paginator
 
 
+import locale
+locale.setlocale(
+    category=locale.LC_ALL,
+    locale="Russian"  # Note: do not use "de_DE" as it doesn't work
+)
+
 def get_geolocation(ip):
     try:
         response = requests.get(f'http://ipinfo.io/{ip}/json')
@@ -67,14 +73,14 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
         return reverse('advertiser_offers')
 
 
-class OfferDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class OfferDetailView(LoginRequiredMixin, DetailView):
     model = Offer
     template_name = 'offers/offer_detail.html'
 
-
     def get_queryset(self):
-        offer = self.get_object.filter(id=pk)
-        return self.request.user.is_superuser or offer.partner_card.advertiser.user == self.request.user
+        offer = Offer.objects.filter(id=self.kwargs['pk'])
+        print(offer)
+        return offer
 
 
 class PauseOfferView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -243,7 +249,7 @@ def remove_offer(request, offer_id):
     if OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
         OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
 
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    return redirect('offer_detail', offer_id)
 
 
 class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
@@ -350,6 +356,78 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
         context['offers'] = Offer.objects.filter(webmaster_links__webmaster=webmaster)
         return context
 
+class WebmasterTrashLeadsView(LoginRequiredMixin, ListView):
+    model = LeadWall
+    template_name = 'leads/webmaster_trash_leads.html'
+    context_object_name = 'leads'
+    paginate_by = 25  # Устанавливаем количество элементов на страницу
+
+    def get_queryset(self):
+        webmaster = get_object_or_404(Webmaster, user=self.request.user)
+        queryset = LeadWall.objects.filter(offer_webmaster__webmaster=webmaster, processing_status__in=['trash', 'duplicate']).order_by('-id')
+
+        el_id = self.request.GET.get('id')
+
+        offer_id = self.request.GET.get('offer_id')
+        status = self.request.GET.get('lead_status')
+        domain_name = self.request.GET.get('domain_name')
+        name = self.request.GET.get('name')
+        processing_status = self.request.GET.get('precessing_status')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        sub_filters = {f"sub_{i}": self.request.GET.get(f"sub_{i}") for i in range(1, 6)}
+        geo = self.request.GET.get("geo")
+        phone_number = self.request.GET.get("phone_number")
+
+
+        if el_id:
+            queryset = queryset.filter(id=el_id)
+
+        if offer_id:
+            queryset = queryset.filter(offer_webmaster__offer__id=offer_id)
+
+        if domain_name:
+            queryset = queryset.filter(domain=domain_name)
+
+        if name:
+            queryset = queryset.filter(name=name)
+
+        if status:
+            queryset = queryset.filter(status=status)
+
+        if processing_status:
+            queryset = queryset.filter(processing_status=processing_status)
+
+        if start_date:
+            queryset = queryset.filter(created_at__gte=start_date)
+
+        if end_date:
+            queryset = queryset.filter(created_at__lte=end_date)
+
+        for key, value in sub_filters.items():
+            if value:
+                queryset = queryset.filter(**{key: value})
+
+        if geo:
+            query = Q()
+            for el in geo.split():
+                query |= Q(geo__icontains=el)  # Ищем по каждому слову
+
+            # Применяем фильтр с использованием Q-объекта
+            queryset = queryset.filter(query)
+
+        if phone_number:
+            queryset = queryset.filter(phone=phone_number)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        webmaster = get_object_or_404(Webmaster, user=self.request.user)
+        context['offers'] = Offer.objects.filter(webmaster_links__webmaster=webmaster)
+        return context
+
+
 @require_POST
 @login_required
 def add_comment(request):
@@ -383,7 +461,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         advertiser = get_object_or_404(Advertiser, user=self.request.user)
-        queryset = LeadWall.objects.filter(offer_webmaster__offer__partner_card__advertiser=advertiser).order_by('-id')
+        queryset = LeadWall.objects.filter(offer_webmaster__offer__partner_card__advertiser=advertiser).exclude(processing_status__in=['trash', 'duplicate']).order_by('-id')
 
         el_id = self.request.GET.get('id')
 
@@ -680,9 +758,16 @@ class WebmasterFinancialStatisticsView(LoginRequiredMixin, View):
             for stat in financial_stats:
                 stat['date_range'] = "За все время"
 
+        result = {
+            "res_accepted_leads": sum([stat['accepted_leads'] for stat in financial_stats]),
+            "res_earned": sum([int(stat['earned']) for stat in financial_stats if stat['earned']]),
+            "res_hold": sum([int(stat['on_hold']) for stat in financial_stats if stat['on_hold']])
+        }
+
         context = {
             'offers': offers,
-            'financial_stats': financial_stats
+            'financial_stats': financial_stats,
+            'result': result
         }
         return render(request, self.template_name, context)
 
@@ -692,13 +777,29 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
     paginate_by = 50
 
     def get(self, request, *args, **kwargs):
+        advertiser = get_object_or_404(Advertiser, user=request.user)
+        offers = Offer.objects.filter(partner_card__advertiser=advertiser)
+
+        offer_web = OfferWebmaster.objects.filter(offer__partner_card__advertiser=advertiser)
+
         # Получение фильтров из запроса
-        start_date = request.GET.get('start_date')
-        end_date = request.GET.get('end_date')
+        get_date = self.request.GET.get('date')
+
+        if get_date:
+            get_date = get_date.split(' - ')
+            start_date = get_date[0].replace('/', '-')
+            end_date = get_date[1].replace('/', '-')
+        else:
+            start_date = None
+            end_date = None
+
         offer_id = request.GET.get('offer_id')
+        enter_type = request.GET.get('enter_type')
+
+
 
         # Фильтрация по дате и офферам
-        lead_filter = Q()
+        lead_filter = Q(offer_webmaster__in=offer_web)
         if start_date:
             lead_filter &= Q(created_at__gte=datetime.strptime(start_date, '%Y-%m-%d'))
         if end_date:
@@ -706,38 +807,136 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
         if offer_id:
             lead_filter &= Q(offer_webmaster__offer__id=offer_id)
 
-        leads = LeadWall.objects.all()
-        offers = Offer.objects.all()
-        offer_web = OfferWebmaster.object.all()
+        leads = LeadWall.objects.filter(lead_filter)
 
+        clicks = Click.objects.filter(offer_webmaster__in=offer_web)
+        if start_date:
+            clicks = clicks.filter(created_at__gte=datetime.strptime(start_date, '%Y-%m-%d'))
+        if end_date:
+            clicks = clicks.filter(created_at__lte=datetime.strptime(end_date, '%Y-%m-%d'))
+        if offer_id:
+            clicks = clicks.filter(offer_webmaster__offer_id=offer_id)
 
-        # Статистика по офферам
-        offer_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id', 'created_at').annotate(
-            unique_leads=Count('id', distinct=True),
-            approved_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
-            new_leads=Count('id', filter=Q(processing_status='new')),
-            rejected_leads=Count('id', filter=Q(
-                processing_status__in=['no_response', 'callback', 'appointment', 'visit', 'trash', 'duplicate'])),
-            accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
-            earned=Sum('offer_webmaster__offer__lead_price',
-                       filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
-        ).order_by('created_at')
+        click_counts = clicks.values('offer_webmaster__offer__id').annotate(total_clicks=Count('id')).order_by()
 
-        web_data = []
+        clicks_dict = {item['offer_webmaster__offer__id']: item['total_clicks'] for item in click_counts}
 
-        for stat in offer_stats:
-            stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
-                                                                                                   'unique_leads'] > 0 else 0
+        if enter_type == 'by_days':
+            # Статистика по офферам
+            offer_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id', 'created_at__date').annotate(
+                unique_leads=Count('id', distinct=True),
+                approved_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                new_leads=Count('id', filter=Q(processing_status='new')),
+                rejected_leads=Count('id', filter=Q(
+                    processing_status__in=['no_response', 'callback', 'appointment', 'visit', 'trash', 'duplicate'])),
+                paid=Sum('offer_webmaster__offer__offer_price',
+                           filter=Q(status__in=['paid']))
+            ).order_by('created_at')
 
-        for el in offers:
-            web_data.append(el.id)
+            for stat in offer_stats:
+                stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
+                                                                                                       'unique_leads'] > 0 else 0
+        else:
+            # Статистика по офферам
+            offer_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id',
+                                       'offer_webmaster__offer__offer_price').annotate(
+                unique_leads=Count('id', distinct=True),
+                approved_leads=Count('id', filter=Q(status='paid')),
+                new_leads=Count('id', filter=Q(status='on_hold')),
+                rejected_leads=Count('id', filter=Q(status='cancelled')),
+                duplicate_leads=Count('id', filter=Q(processing_status='duplicate')),
+                accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                earned=Sum('offer_webmaster__offer__offer_price',
+                           filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                on_hold=Sum('offer_webmaster__offer__lead_price',
+                            filter=Q(status="on_hold")),
+                sum_konv=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'],
+                                              processing_status__in=['trash', 'duplicate']))
+            ).order_by('offer_webmaster__offer__name')
 
-        print(web_data)
+            for stat in offer_stats:
+                total_clicks = clicks_dict.get(offer_id, 0)
+                offer_price = offers.aggregate(Sum('offer_price'))['offer_price__sum'] or 0
+                stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
+                                                                                                       'unique_leads'] > 0 else 0
+                stat['total_income'] = stat['approved_leads'] * offer_price  # Расчет дохода
+                stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
+                                                                                                       'unique_leads'] > 0 else 0
+                stat['conversion_rate'] = (stat['unique_leads'] / total_clicks * 100) if total_clicks > 0 else 0
+                stat['epc'] = (stat['total_income'] / total_clicks) if total_clicks > 0 else 0
 
         context = {
             'offers': offers,
             'offer_stats': offer_stats,
-            'len': len(offer_stats)
+        }
+        return render(request, self.template_name, context)
+
+
+
+class AdminOfferStatisticsView(LoginRequiredMixin, View):
+    template_name = 'statistics/admin_offer_statistics.html'
+    paginate_by = 50
+
+    def get(self, request, *args, **kwargs):
+        # Получение фильтров из запроса
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        offer_id = request.GET.get('offer_id')
+
+        # Фильтрация по дате и офферам
+        partner_crd = PartnerCard.objects.all()
+
+        all_data = []
+
+        for card in partner_crd:
+            if card.name not in all_data:
+
+                per = {}
+
+                offers = Offer.objects.filter(partner_card=card.id)
+
+                web_data = []
+                for el in offers:
+                    web_data.append(el.id)
+
+                offerWeb = OfferWebmaster.objects.filter(offer_id__in=web_data)
+
+                lead_filter = Q(offer_webmaster__in=offerWeb)
+                if start_date:
+                    lead_filter &= Q(created_at__gte=datetime.strptime(start_date, '%Y-%m-%d'))
+                if end_date:
+                    lead_filter &= Q(created_at__lte=datetime.strptime(end_date, '%Y-%m-%d'))
+                if offer_id:
+                    lead_filter &= Q(offer_webmaster__offer__id=offer_id)
+                leads = LeadWall.objects.filter(lead_filter)
+                # Статистика по офферам
+
+                offer_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id', 'offer_webmaster__webmaster_id',
+                                           'created_at').annotate(
+                    unique_leads=Count('id', distinct=True),
+                    approved_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                    new_leads=Count('id', filter=Q(processing_status='new')),
+                    rejected_leads=Count('id', filter=Q(
+                        processing_status__in=['no_response', 'callback', 'appointment', 'visit', 'trash',
+                                               'duplicate'])),
+                    accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                    on_hold=Sum('offer_webmaster__offer__offer_price',
+                                filter=Q(status="on_hold")),
+                    earned=Sum('offer_webmaster__offer__lead_price',
+                               filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+                ).order_by('offer_webmaster__offer__id')
+
+                for stat in offer_stats:
+                    stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
+                                                                                                           'unique_leads'] > 0 else 0
+                per['offer_stats'] = offer_stats
+                per['name'] = card.name
+                all_data.append(per)
+
+
+        context = {
+            'all_data': all_data,
+            'partner_cards': partner_crd,
         }
         return render(request, self.template_name, context)
 
@@ -775,12 +974,21 @@ class AdvertiserFinancialStatisticsView(LoginRequiredMixin, View):
         # Финансовая статистика
         financial_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id', 'offer_webmaster__webmaster__user__username').annotate(
             accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
-            spent=Sum('offer_webmaster__offer__lead_price', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+            spent=Sum('offer_webmaster__offer__offer_price', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
+            on_hold=Sum('offer_webmaster__offer__offer_price',
+                        filter=Q(status="on_hold")),
+
         ).order_by('offer_webmaster__offer__name')
+
+        result = {
+            "res_accepted_leads": sum([stat['accepted_leads'] for stat in financial_stats]),
+            "res_spent": sum([int(stat['spent']) for stat in financial_stats if stat['spent']]),
+        }
 
         context = {
             'offers': offers,
-            'financial_stats': financial_stats
+            'financial_stats': financial_stats,
+            'result': result
         }
         return render(request, self.template_name, context)
 

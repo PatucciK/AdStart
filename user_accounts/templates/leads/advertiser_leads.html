@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 {% load custom_tags %}
 {% block title %}Лиды рекламодателя{% endblock %}
+
+{% block page_title %}
+    <h2 class="text-center my-4">Лиды рекламодателя</h2>
+{% endblock %}
+
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <h2 class="my-4 text-center">Лиды рекламодателя</h2>
         <form method="get" class="mb-4" id="filter-form">
+
                 <table class="table table-striped table-hover table-sm" style="font-size: 0.85rem;">
                     <thead class="thead-dark">
                     <tr>
@@ -16,8 +22,9 @@
                         <th>IP (Геопозиция)</th>
                         <th>Описание</th>
                         <th>Дополнительно</th>
-                        <th>Статус обработки</th>
+                        <th>Статус</th>
                         <th>Состояние</th>
+                        <th>Оффер</th>
                         <th>Дата создания</th>
                         <th>Дата изменения статуса</th>
                         <th>Комментарий</th>
@@ -35,6 +42,14 @@
                             <td></td>
                             <td></td>
                             <td>
+                                <select id="precessing_status" name="precessing_status" class="form-select form-select-sm">
+                                    <option value="">Все статусы</option>
+                                    {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
+                                    <option value="{{ status }}" {% if status == request.GET.precessing_status %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
                                 <select id="lead_status" name="lead_status" class="form-select form-select-sm">
                                     <option value="">Все статусы</option>
                                     {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
@@ -43,12 +58,12 @@
                                 </select>
                             </td>
                             <td>
-                                <select id="precessing_status" name="precessing_status" class="form-select form-select-sm">
-                                    <option value="">Все статусы</option>
-                                    {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
-                                    <option value="{{ status }}" {% if status == request.GET.precessing_status %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+                                <select id="offer_id" name="offer_id" class="form-select form-select-sm">
+                                    <option value="">Все офферы</option>
+                                    {% for offer in offers %}
+                                    <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
+                                {% endfor %}
+                            </select>
                             </td>
 
                             <td>
@@ -86,6 +101,11 @@
                             {% endif %}
                         </td>
                         <td>{{ lead.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'webmaster_offer_detail' lead.offer_webmaster.offer.id %}">
+                                {{ lead.offer_webmaster.offer.name|default_if_none:"" }}
+                            </a>
+                        </td>
                         <td>{{ lead.created_at|date:"d.m.Y" }}</td>
                         <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
                         <td>
@@ -240,19 +260,19 @@
         });
     })
 </script>
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Найдем все элементы фильтров в форме
-            const filterForm = document.getElementById('filter-form');
-            const filterElements = filterForm.querySelectorAll('select, input');
+<!--<script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            // Найдем все элементы фильтров в форме-->
+<!--            const filterForm = document.getElementById('filter-form');-->
+<!--            const filterElements = filterForm.querySelectorAll('select, input');-->
 
-            // Добавим обработчик события для каждого элемента формы
-            filterElements.forEach(function(element) {
-                element.addEventListener('change', function() {
-                    // Отправляем форму автоматически при изменении любого фильтра
-                    filterForm.submit();
-                });
-            });
-        });
-    </script>
+<!--            // Добавим обработчик события для каждого элемента формы-->
+<!--            filterElements.forEach(function(element) {-->
+<!--                element.addEventListener('change', function() {-->
+<!--                    // Отправляем форму автоматически при изменении любого фильтра-->
+<!--                    filterForm.submit();-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
 {% endblock %}

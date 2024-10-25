@@ -30,6 +30,7 @@ class Offer(models.Model):
     working_hours = models.CharField(max_length=255, blank=True, null=True, verbose_name='Режим работы колл-центра')
     service_description = RichTextField(verbose_name='Описание услуг по офферу')
     geo = models.CharField(max_length=255, blank=True, null=True, verbose_name='ГЕО')
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за оффер', blank=True, null=True)
     lead_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за лид', blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='registered', verbose_name='Актуальность')
     public_status = models.CharField(max_length=20, choices=PUBLIC_STATUS_CHOICES, default='private',

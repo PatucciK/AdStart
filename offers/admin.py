@@ -4,7 +4,7 @@ from .models import Offer, LeadWall, OfferWebmaster, Click
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-    list_display = ('name', 'status', 'public_status', 'partner_card', 'lead_price')
+    list_display = ('name', 'status', 'public_status', 'partner_card', 'lead_price', 'offer_price')
     list_filter = ('status', 'public_status', 'partner_card')
     search_fields = ('name', 'inn', 'partner_card__name')
 
@@ -38,7 +38,7 @@ class LeadWallAdmin(admin.ModelAdmin):
 
 @admin.register(OfferWebmaster)
 class OfferWebmasterAdmin(admin.ModelAdmin):
-    list_display = ('offer', 'webmaster', 'unique_token')
+    list_display = ('offer', 'webmaster', 'unique_token', 'phone')
     search_fields = ('offer__name', 'webmaster__name', 'unique_token')
 
 @admin.register(Click)

@@ -1,14 +1,18 @@
-<!-- templates/statistics/advertiser_financial_statistics.html -->
+<!-- templates/statistics/advertiser_offer_statistics.html -->
 {% extends "base.html" %}
-{% block title %}Финансовая Статистика{% endblock %}
+
+{% load custom_tags %}
+{% block title %}Статистика по Офферам{% endblock %}
 
 {% block page_title %}
-    <h2 class="text-center my-4">Финансовая Статистика</h2>
+    <h2 class="text-center my-4">Статистика по Офферам</h2>
 {% endblock %}
+
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
+
         <!-- Фильтры -->
         <form method="get" class="mb-4">
             <div class="row">
@@ -38,54 +42,46 @@
         <table class="table table-striped mt-4">
             <thead>
                 <tr>
+                    <th>Контрагент</th>
                     <th>Оффер</th>
                     <th>Вебмастер</th>
-                    <th>Принятые лиды</th>
-                    <th>Выплачено ₽</th>
-                    <th>Холд ₽</th>
+                    <th>Всего лидов</th>
+                    <th>Апрувнутых лидов</th>
+                    <th>% Апрува</th>
+                    <th>Выплата</th>
+                    <th>Выплата веба</th>
+                    <th>Заработано</th>
+                    <th>Заработано вебом</th>
                 </tr>
             </thead>
             <tbody>
-                {% for stat in financial_stats %}
-                <tr>
-                    <td>
-                        {% if stat.offer_webmaster__offer__id %}
-                            <a href="{% url 'offer_detail' stat.offer_webmaster__offer__id %}">{{ stat.offer_webmaster__offer__name }}</a>
-                        {% else %}
-                            {{ stat.offer_webmaster__offer__name }}
-                        {% endif %}
-                    </td>
-                    <td>{{ stat.offer_webmaster__webmaster__user__username }}</td>
-                    <td>{{ stat.accepted_leads }}</td>
+                {% for el in all_data %}
 
+                    {% if el.offer_stats|length > 0 %}
+                    <tr>
+                        {% get_len_arr el.offer_stats as total_rowspan %}
+                        <td rowspan="{{ total_rowspan }}">{{ el.name }}</td>
 
-                    <td>
-                        {% if stat.spent  %}
-                            {{ stat.spent }}
-                        {% else %}
-                            0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if stat.on_hold  %}
-                        {{ stat.on_hold }}
-                        {% else %}
-                            0
-                        {% endif %}
-                    </td>
-                </tr>
+                    </tr>
+
+                    {% for offer in el.offer_stats %}
+                           {% if offer.offer_webmaster__offer__name %}
+                            <tr>
+                                <td>{{ offer.offer_webmaster__offer__name }}</td>
+                                {% get_web_name offer.offer_webmaster__webmaster_id as web_name%}
+                                <td>{{ web_name }}</td>
+                                <td>{{ offer.unique_leads }}</td>
+                                <td>{{ offer.approved_leads }}</td>
+                                <td></td>
+                                <td>{{ offer.earned}}</td>
+                            </tr>
+                            {% endif %}
+                    {% endfor %}
+
+                    {% endif %}
                 {% endfor %}
             </tbody>
-            <tfoot>
-                <tr>
-                    <td><strong>Итого</strong></td>
-                    <td></td>
-                    <td><strong>{{ result.res_accepted_leads }}</strong></td>
-                    <td> <strong>{{ result.res_spent }}</strong></td>
-                </tr>
-            </tfoot>
         </table>
     </div>
 </div>
 {% endblock %}
-

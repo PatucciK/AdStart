@@ -15,7 +15,7 @@
         {% is_mine offer.id as some_name %}
         {% if some_name %}
 
-            <form method="post" action="#" class="text-center">
+            <form method="post" action="{% url 'remove_offer' offer.id %}" class="text-center">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
             </form>
@@ -67,7 +67,7 @@
                 <p><strong>Фактический адрес:</strong> {{ offer.partner_card.actual_addresses }}</p>
 
                 <!-- Телефон для переадресации -->
-                <p><strong>Телефон для переадресации:</strong> (mts.exolve.buy_number)</p>
+                <p><strong>Телефон для переадресации:</strong> {{ offer_webmaster.phone }}</p>
 
                 <!-- Режим работы -->
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>

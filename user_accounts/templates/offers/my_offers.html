@@ -2,6 +2,12 @@
 {% load custom_tags %}
 
 {% block title %}Мои офферы{% endblock %}
+
+{% block page_title %}
+    <h2 class="text-center my-4">Мои офферы</h2>
+{% endblock %}
+
+
 {% block content %}
 <!-- Подключение CSS для Choices.js -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -25,10 +31,10 @@
       </a>
     </li>
   </ul>
-
+<br>
 <div class="row justify-content-center">
     <div class="col-md-10">
-        <h2 class="my-4 text-center">Мои офферы</h2>
+
         <form method="get" class="mb-4" id="form-table">
             {% csrf_token %}
 
@@ -73,7 +79,7 @@
                             {% endfor %}
                         </select>
                     </td>
-                    <td>Действие</td>
+                    <td></td>
 
                 </tr>
                 {% for offer in offers %}
@@ -99,21 +105,10 @@
                         {% endfor %}
                     </td>
                     <td>
-                        {% is_mine offer.id as some_name %}
-                        {% if some_name %}
-                            <form method="post" action="{% url 'remove_offer' offer.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-                            </form>
 
-                        {% else %}
-
-                            <form method="post" action="{% url 'take_offer' offer.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-success btn-sm">Добавить</button>
-                            </form>
-
-                        {% endif %}
+                        <form method="post" action="{% url 'remove_offer' offer.id %}" style="display: block">
+                            <button id="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        </form>
 
                     </td>
                 </tr>

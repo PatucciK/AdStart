@@ -34,6 +34,8 @@ class CustomLoginView(View):
             return JsonResponse({"success": True}, status=200)
         else:
             return JsonResponse({"success": False, "error": "Неверное имя пользователя или пароль."}, status=401)
+
+
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)

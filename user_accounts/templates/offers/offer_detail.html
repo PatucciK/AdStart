@@ -12,12 +12,16 @@
                 <p><strong>Юридический адрес:</strong> {{ offer.partner_card.legal_address }}</p>
                 <p><strong>Фактический адрес:</strong> {{ offer.partner_card.actual_addresses }}</p>
                 <p><strong>Режим работы:</strong> {{ offer.working_hours }}</p>
-                <p><strong>Описание услуг по офферу:</strong> {{ offer.service_description }}</p>
+                <p><strong>Описание услуг по офферу:</strong>
+                    <p>{{ offer.service_description|safe }}</p>
+                </p>
                 <p><strong>ГЕО:</strong> {{ offer.geo }}</p>
                 <p><strong>Цена за лид:</strong> {{ offer.lead_price }} руб.</p>
                 <p><strong>Дата договора:</strong> {{ offer.contract_date }}</p>
                 <p><strong>Статус:</strong> {{ offer.get_status_display }}</p>
                 <p><strong>Публичный статус:</strong> {{ offer.get_public_status_display }}</p>
+
+                {% if user.is_superuser %}
 
                 <div class="d-flex justify-content-between">
                     {% if offer.status == 'registered' %}
@@ -45,6 +49,7 @@
                         </form>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

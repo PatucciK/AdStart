@@ -2,6 +2,7 @@ import requests
 from django import template
 from user_accounts.models import Advertiser, Webmaster
 from partner_cards.models import PartnerCard
+
 from offers.models import OfferWebmaster, Offer
 from django.shortcuts import get_object_or_404
 
@@ -56,3 +57,13 @@ def get_partner_name(partner_id):
     if type(partner_id) == int:
         return PartnerCard.objects.get(id=partner_id).name
     return "None"
+
+@register.simple_tag
+def get_web_name(web_id):
+    if type(web_id) == int:
+        return Webmaster.objects.get(id=web_id).user_id
+    return "None"
+
+@register.simple_tag
+def get_len_arr(arr):
+    return len(arr) + 1
