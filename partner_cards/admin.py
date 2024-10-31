@@ -12,7 +12,7 @@ class PartnerCardAdmin(admin.ModelAdmin):
     list_filter = ('advertiser', 'is_approved')
 
     def get_readonly_fields(self, request, obj=None):
-        if not request.user.is_superuser:
-            return self.readonly_fields + ('deposit',)
+        # if not request.user.is_superuser:
+        #     return self.readonly_fields + ('deposit',)
         return self.readonly_fields
 

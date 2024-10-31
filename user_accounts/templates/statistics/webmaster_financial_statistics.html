@@ -7,6 +7,13 @@
 
 
 {% block content %}
+
+<!-- Подключение jQuery -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 <div class="row justify-content-center">
     <div class="col-md-10">
 
@@ -23,13 +30,10 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <br>
                     <div class="col-md-4 mb-2">
-                        <label for="start_date" class="form-label">Дата от</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label for="end_date" class="form-label">Дата до</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
+                        <label for="date" class="form-label">Дата</label>
+                        <input type="text" id="date" name="date" class="form-control form-control-sm" value="{{ request.GET.date }}" placeholder="Дата">
                     </div>
                 </div>
                 <div class="text-center mt-3">
@@ -124,4 +128,52 @@
         </nav>
     </div>
 </div>
+
+
+<script>
+$(function() {
+    $('#date').daterangepicker({
+
+        opens: 'left',
+        locale: {
+            format: 'YYYY-MM-DD',  // Устанавливаем формат даты для совместимости с сервером
+            "daysOfWeek": [
+                "Вс",
+                "Пн",
+                "Вт",
+                "Ср",
+                "Чт",
+                "Пт",
+                "Сб"
+            ],
+            "monthNames": [
+                "Январь",
+                "Февраль",
+                "Март",
+                "Апрель",
+                "Май",
+                "Июнь",
+                "Июль",
+                "Август",
+                "Сентябрь",
+                "Октябрь",
+                "Ноябрь",
+                "Декабрь"
+            ],
+        },
+        ranges: {
+            'Все время': [moment('1970-01-01'), moment()],
+            'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Последние 2 дня': [moment().subtract(1, 'days'), moment()],
+            'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+            'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+            'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+            'Прошлый месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+
+
+    });
+});
+</script>
+
 {% endblock %}

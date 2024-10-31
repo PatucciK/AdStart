@@ -37,6 +37,9 @@ class CustomLoginView(View):
 
 
 def register(request):
+
+    from AdStart.celery import  send_verification_email_async
+
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
@@ -56,13 +59,7 @@ def register(request):
             except EmailConfirmation.DoesNotExist:
                 EmailConfirmation.objects.create(email=email, confirmation_code=confirmation_code)
             # Отправка кода на почту
-            send_mail(
-                'Ваш код подтверждения',
-                f'Ваш код подтверждения: {confirmation_code}',
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-            )
+            send_verification_email_async(email, confirmation_code)
             request.session['email'] = email
             return redirect('email_confirmation')
     else:

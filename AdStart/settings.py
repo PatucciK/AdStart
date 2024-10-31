@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+from django.conf.global_settings import DEFAULT_FROM_EMAIL
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,6 +25,11 @@ SECRET_KEY = 'django-insecure-%)=nwy56a0w0nb$t0zg%)ghc@t#j$+qr&ieckp375v7de$_f9b
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+LANGUAGES = (
+    ('ru', 'Russian'),
+    ('en', 'English'),
+)
 
 ALLOWED_HOSTS = ["212.67.14.251", "localhost", "127.0.0.1"]
 
@@ -193,3 +200,12 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
 }
 
+
+# Email setting
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'  # Адрес вашего SMTP-сервера
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'adstartpartner@mail.ru'
+EMAIL_HOST_PASSWORD = 'ki899TTiQPmvVwhDDBHg'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

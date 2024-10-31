@@ -110,7 +110,7 @@
                         <td></td>
 
                 </tr>
-                {% for lead in page_obj %}
+                {% for lead in leads %}
                 <tr class="{% if lead.status == 'on_hold' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
                     <td>{{ lead.domain|default_if_none:"" }}</td>
                     <td>{{ lead.id }}</td>
@@ -135,10 +135,14 @@
                     <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
                     <td>
                         {% if lead.comments.last %}
-                        <p><strong>{{ lead.comments.last.user.username }}</strong> ({{ lead.comments.last.created_at|date:"d.m.Y H:i:s" }}):</p>
-                        <p>{{ lead.comments.last.text }}</p>
-                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}">Посмотреть все комментарии</button>
+                        <div id="first-comment-{{ lead.id }}">
+                            <p ><strong>{{ lead.comments.last.user.username }}</strong> ({{ lead.comments.last.created_at|date:"d.m.Y H:i:s" }}):</p>
+                            <p>{{ lead.comments.last.text }}</p>
+                        </div>
+                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}" type="button">Посмотреть все комментарии</button>
                         <div class="all-comments" id="all-comments-{{ lead.id }}" style="display: none;">
+
+
                             {% for comment in lead.comments.all %}
                             <div>
                                 <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"d.m.Y H:i:s" }}):
@@ -201,8 +205,11 @@
                 button.addEventListener('click', function() {
                     const leadId = this.getAttribute('data-lead-id');
                     const commentsDiv = document.getElementById(`all-comments-${leadId}`);
+                    const commentsForstDiv = document.getElementById(`first-comment-${leadId}`);
+
                     if (commentsDiv.style.display === 'none') {
                         commentsDiv.style.display = 'block';
+                        commentsForstDiv.style.display = 'none';
                         this.style.display = 'none'; // Скрываем кнопку после показа всех комментариев
                     } else {
                         commentsDiv.style.display = 'none';

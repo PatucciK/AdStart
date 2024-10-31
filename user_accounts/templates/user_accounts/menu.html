@@ -7,17 +7,10 @@
                 <a href="{% url 'view_partner_card' %}" class="list-group-item list-group-item-action">Депозит</a>
                 <a href="{% url 'advertiser_offers' %}" class="list-group-item list-group-item-action">Офферы</a>
                 <a href="{% url 'advertiser_leads' %}" class="list-group-item list-group-item-action">Лидвол</a>
-
-                {% if user.is_superuser %}
-                    <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action"> Статистика</a>
-
-                    <a href="{% url 'admin_offer_statistics' %}" class="list-group-item list-group-item-action">Admin Статистика</a>
-                {% else %}
-                    <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action">Статистика</a>
-                {% endif %}
+                <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action"> Статистика</a>
                 <a href="{% url 'advertiser_financial_statistics' %}" class="list-group-item list-group-item-action">Финансы</a>
-
-<!--                <a href="{% url 'edit_partner_card' %}" class="list-group-item list-group-item-action">Карточка партнера</a>-->
+                {% else %}
+                <a href="{% url 'edit_partner_card' %}" class="list-group-item list-group-item-action">Карточка партнера</a>
             {% endif %}
         {% elif webmaster_profile %}
             <a href="{% url 'available_offers' %}" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Офферы{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
@@ -27,6 +20,13 @@
             <a href="{% url 'webmaster_financial_statistics' %}" class="list-group-item list-group-item-action {% if not webmaster_profile.is_approved %}disabled{% endif %}">Финансы{% if not webmaster_profile.is_approved %}(Недоступно){% endif %}</a>
 
         {% endif %}
+
+        {% if user.is_superuser %}
+            <a href="{% url 'admin_offer_statistics' %}" class="list-group-item list-group-item-action">Admin Статистика</a>
+        {% else %}
+            <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action">Статистика</a>
+        {% endif %}
+
     {% endif %}
 
 

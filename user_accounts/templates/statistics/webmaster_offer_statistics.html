@@ -15,8 +15,6 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <div class="container mt-5">
-    <h2 class="my-4 text-center">Статистика</h2>
-
     <!-- Фильтры и кнопки -->
     <form method="get" class="mb-4" id="filterForm">
         <div class="form-row">
@@ -85,8 +83,8 @@
                     <option {% if request.GET.enter_type == "by_days" %}selected{% endif %} value="by_days">
                         По дням
                     </option>
-                    <option value="by_hour" {% if request.GET.enter_type == "by_hour" %}selected{% endif %}>По часам</option>
-                    <option value="by_week" {% if request.GET.enter_type == "by_week" %}selected{% endif %}>По неделям</option>
+<!--                    <option value="by_hour" {% if request.GET.enter_type == "by_hour" %}selected{% endif %}>По часам</option>-->
+<!--                    <option value="by_week" {% if request.GET.enter_type == "by_week" %}selected{% endif %}>По неделям</option>-->
                     <option value="by_month" {% if request.GET.enter_type == "by_month" %}selected{% endif %}>По месяцам</option>
                 </select>
             </div>
@@ -134,7 +132,9 @@
                 <th>CR (%)</th>
                 <th>EPC (₽)</th>
                 <th>Approve (%)</th>
-                <th>Цена за лид</th>
+                {% if request.GET.enter_type != 'by_month' %}
+                    <th>Цена за лид</th>
+                {% endif %}
                 <th>Заработано ₽</th>
                 <th>Холд ₽</th>
             </tr>
@@ -147,6 +147,8 @@
                 {% elif request.GET.enter_type == 'by_month' %}
                     <td>{{ stat.month }}</td>
 
+                {% elif request.GET.enter_type == 'by_hour' %}
+                    <td>{{ stat.created_at__hour }}</td>
                 {% else %}
                     <td>{{ stat.created_at__date|date:"d.m.Y" }}</td>
                 {% endif %}
@@ -161,8 +163,9 @@
                 <td>{{ stat.conversion_rate|floatformat:2 }}</td>
                 <td>{{ stat.epc|floatformat:2 }}</td>
                 <td >{{ stat.approve_percent|floatformat:2 }}</td>
-                <td>{{ stat.offer_webmaster__offer__lead_price }}</td>
-
+                {% if request.GET.enter_type != 'by_month' %}
+                    <td>{{ stat.lead_price }}</td>
+                {% endif %}
                 <td class="sum_earned">
                     {% if stat.earned %}
                     {{ stat.earned }}
@@ -170,7 +173,7 @@
                     0
                     {% endif %}
                 </td>
-                <td>
+                <td class="sum_hold">
                     {% if stat.on_hold %}
                         {{ stat.on_hold }}
                     {% else %}
@@ -189,9 +192,11 @@
                 <td id="totalSum_trash_leads"><strong>0</strong></td>
                 <td id="totalSum_duplicate_leads"><strong>0</strong></td>
                 <td colspan="3"></td>
-                <td></td>
+                {% if request.GET.enter_type != 'by_month' %}
+                    <td></td>
+                {% endif %}
                 <td id="totalSum_earned"><strong>0</strong></td>
-                <td id="totalSum_hold"></td>
+                <td id="totalSum_hold"><strong>0</strong></td>
             </tr>
         </tfoot>
         </tbody>
@@ -225,7 +230,30 @@
 
             opens: 'left',
             locale: {
-                format: 'YYYY-MM-DD'  // Устанавливаем формат даты для совместимости с сервером
+                format: 'YYYY-MM-DD',  // Устанавливаем формат даты для совместимости с сервером
+                "daysOfWeek": [
+                    "Вс",
+                    "Пн",
+                    "Вт",
+                    "Ср",
+                    "Чт",
+                    "Пт",
+                    "Сб"
+                ],
+                "monthNames": [
+                    "Январь",
+                    "Февраль",
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь"
+                ],
             },
             ranges: {
                 'Все время': [moment('1970-01-01'), moment()],

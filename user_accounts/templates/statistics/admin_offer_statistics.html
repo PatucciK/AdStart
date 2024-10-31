@@ -10,37 +10,64 @@
 
 
 {% block content %}
+<!-- Подключение CSS для Choices.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+<!-- Подключение JS для Choices.js -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js" defer></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+
+
 <div class="row justify-content-center">
     <div class="col-md-10">
 
         <!-- Фильтры -->
         <form method="get" class="mb-4">
+            {% csrf_token %}
+
             <div class="row">
-                <div class="col-md-3">
-                    <label for="offer_id">Оффер</label>
-                    <select id="offer_id" name="offer_id" class="form-control">
-                        <option value="">Все офферы</option>
-                        {% for offer in offers %}
-                        <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
-                        {% endfor %}
-                    </select>
+
+                <div class="row">
+                    <div class="col-sm">
+                        <label for="offer_id">Оффер</label>
+                        <select id="offer_id" name="offer_id" class="form-control">
+                            <option value="">Все офферы</option>
+                            {% for offer in offers %}
+                            <option value="{{ offer.id }}" {% if offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+                    <div class="col-sm">
+                        <label for="date" class="form-label">Дата</label>
+                        <input type="text" id="date" name="date" class="form-control form-control-sm" value="{{ request.GET.date }}" placeholder="Дата">
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label for="start_date">Дата от</label>
-                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="end_date">Дата до</label>
-                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
-                </div>
+
+
+
+            <div class="col-sm">
+                <label for="offer_id">Выбор вебмастеров</label>
+                <select id="webmasters" name="webmasters[]" class="form-select form-select-sm" multiple>
+                    {% for webmaster in webmasters %}
+                    <option value="{{ webmaster.webmaster_id }}" {% if webmaster.webmaster_id|stringformat:"s" in select_webmasters %}selected{% endif %}>{{ webmaster.webmaster__user__username }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="text-center mt-3">
                 <button type="submit" class="btn btn-primary">Фильтровать</button>
             </div>
+
         </form>
 
-        <table class="table table-striped mt-4">
-            <thead>
+        <table class="table  mt-4">
+            <thead class="table-dark">
                 <tr>
                     <th>Контрагент</th>
                     <th>Оффер</th>
@@ -48,17 +75,18 @@
                     <th>Всего лидов</th>
                     <th>Апрувнутых лидов</th>
                     <th>% Апрува</th>
-                    <th>Выплата</th>
-                    <th>Выплата веба</th>
-                    <th>Заработано</th>
+                    <th>Цена оффера</th>
+                    <th>Цена лида</th>
+                    <th>Заработано за оффер</th>
                     <th>Заработано вебом</th>
+                    <th>Заработано</th> <!-- Заработано за оффер - Заработано вебом -->
                 </tr>
             </thead>
             <tbody>
                 {% for el in all_data %}
 
                     {% if el.offer_stats|length > 0 %}
-                    <tr>
+                    <tr class="table-primary">
                         {% get_len_arr el.offer_stats as total_rowspan %}
                         <td rowspan="{{ total_rowspan }}">{{ el.name }}</td>
 
@@ -68,20 +96,100 @@
                            {% if offer.offer_webmaster__offer__name %}
                             <tr>
                                 <td>{{ offer.offer_webmaster__offer__name }}</td>
-                                {% get_web_name offer.offer_webmaster__webmaster_id as web_name%}
-                                <td>{{ web_name }}</td>
+                                <td>{{ offer.offer_webmaster__webmaster__user__username }}</td>
                                 <td>{{ offer.unique_leads }}</td>
                                 <td>{{ offer.approved_leads }}</td>
-                                <td></td>
-                                <td>{{ offer.earned}}</td>
+                                <td>{{ offer.approve_percent }}</td>
+                                <td>{{ offer.offer_webmaster__offer__offer_price}}</td>
+                                <td>{{ offer.offer_webmaster__offer__lead_price }}</td>
+                                {% if offer.earned_offer %}
+                                    <td>{{ offer.earned_offer }}</td>
+                                {%else%}
+                                    <td>0</td>
+                                {% endif %}
+                                {% if offer.earned_web%}
+                                    <td>{{ offer.earned_web }}</td>
+                                {%else%}
+                                    <td>0</td>
+                                {% endif %}
+
+                                <td>{{ offer.earned_advertiser }}</td>
                             </tr>
                             {% endif %}
                     {% endfor %}
 
+                            <tr class="table-info">
+                                <td></td>
+                                <td><strong>Итого</strong></td>
+                                <td></td>
+                                <td>{{ el.general_stats.unique_leads_sum }}</td>
+                                <td>{{ el.general_stats.approved_leads_sum }}</td>
+                                <td colspan="5"></td>
+                                <td>{{ el.general_stats.earned_advertiser_sum }}</td>
+                            </tr>
                     {% endif %}
+
+
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    // choice js
+    document.addEventListener('DOMContentLoaded', function() {
+        const element = document.getElementById('webmasters');
+        const choices = new Choices(element, {
+            removeItemButton: true,  // Добавляет возможность удаления выбранных элементов
+            placeholder: true,
+            placeholderValue: 'Choose options'
+        });
+    });
+</script>
+<script>
+    $(function() {
+        $('#date').daterangepicker({
+
+            opens: 'left',
+            locale: {
+                format: 'YYYY-MM-DD',  // Устанавливаем формат даты для совместимости с сервером
+                "daysOfWeek": [
+                    "Вс",
+                    "Пн",
+                    "Вт",
+                    "Ср",
+                    "Чт",
+                    "Пт",
+                    "Сб"
+                ],
+                "monthNames": [
+                    "Январь",
+                    "Февраль",
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь"
+                ],
+            },
+            ranges: {
+                'Все время': [moment('1970-01-01'), moment()],
+                'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Последние 2 дня': [moment().subtract(1, 'days'), moment()],
+                'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+                'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+                'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+                'Прошлый месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+
+
+        });
+    });
+    </script>
 {% endblock %}

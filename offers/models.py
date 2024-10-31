@@ -7,6 +7,7 @@ import uuid
 import os
 from git import Repo
 from ckeditor.fields import RichTextField
+from multiselectfield import MultiSelectField
 
 class Offer(models.Model):
     STATUS_CHOICES = [
@@ -19,6 +20,18 @@ class Offer(models.Model):
     PUBLIC_STATUS_CHOICES = [
         ('private', 'Закрытый'),
         ('public', 'Публичный'),
+    ]
+
+    VALIDATION_CHOICES = [
+        ('new', 'Новый лид'),
+        ('expired', 'Просрочено'),
+        ('no_response', 'Нет ответа'),
+        ('callback', 'Перезвонить'),
+        ('appointment', 'Запись на прием'),
+        ('visit', 'Визит'),
+        ('trash', 'Треш'),
+        ('duplicate', 'Дубль'),
+        ('rejected', 'Отклонено'),
     ]
 
     partner_card = models.ForeignKey(PartnerCard, on_delete=models.CASCADE, related_name='offers')
@@ -36,8 +49,13 @@ class Offer(models.Model):
     public_status = models.CharField(max_length=20, choices=PUBLIC_STATUS_CHOICES, default='private',
                                      verbose_name='Публичный статус')
 
+    # Новое поле "Валидация данных" с выбором нескольких значений
+    validation_data_lead = MultiSelectField(choices=VALIDATION_CHOICES, verbose_name='Валидация данных (Рекл.)', blank=True)
+    validation_data_web = MultiSelectField(choices=VALIDATION_CHOICES, verbose_name='Валидация данных (Веб.)', blank=True)
+
+
     def __str__(self):
-        return self.name
+            return self.name
 
     def save(self, *args, **kwargs):
         if self.contract_number == 'AUTO_GENERATE':
@@ -50,7 +68,6 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Оффер'
         verbose_name_plural = 'Офферы'
-
 
 
 class OfferArchive(models.Model):
@@ -123,12 +140,28 @@ class OfferArchive(models.Model):
 
 
 class OfferWebmaster(models.Model):
+
+    VALIDATION_CHOICES = [
+        ('new', 'Новый лид'),
+        ('expired', 'Просрочено'),
+        ('no_response', 'Нет ответа'),
+        ('callback', 'Перезвонить'),
+        ('appointment', 'Запись на прием'),
+        ('visit', 'Визит'),
+        ('trash', 'Треш'),
+        ('duplicate', 'Дубль'),
+        ('rejected', 'Отклонено'),
+    ]
+
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='webmaster_links')
     webmaster = models.ForeignKey(Webmaster, on_delete=models.CASCADE, related_name='offer_links')
     unique_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name='Уникальный токен',
                                     help_text='Уникальный токен для определения связи между оффером и вебмастером')
     phone = models.CharField(max_length=15, verbose_name='Номер мобильного телефона')
     metrika_token = models.CharField(max_length=255, verbose_name='Метрика токен', blank=True, null=True)
+
+    validation_data_lead = MultiSelectField(choices=VALIDATION_CHOICES, verbose_name='Валидация данных', blank=True)
+
 
     def __str__(self):
         return f'{self.offer.name} - {self.webmaster.user.username}'
@@ -177,7 +210,6 @@ class LeadWall(models.Model):
     update_at = models.DateTimeField(verbose_name='Дата обновления', auto_now=True)
 
 
-
     def __str__(self):
         return f'{self.name} - {self.status}'
 
@@ -195,6 +227,7 @@ class LeadWall(models.Model):
     class Meta:
         verbose_name = 'Лидвол'
         verbose_name_plural = 'Лидволы'
+
 
 class Click(models.Model):
     offer_webmaster = models.ForeignKey(OfferWebmaster, on_delete=models.CASCADE, related_name='clicks',
@@ -230,3 +263,5 @@ class LeadComment(models.Model):
     class Meta:
         verbose_name = 'Комментарий к лиду'
         verbose_name_plural = 'Комментарии к лидам'
+
+

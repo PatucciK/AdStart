@@ -37,7 +37,7 @@
                 <select id="offer_id" name="offer_id" class="form-control w-100 h-75">
                     <option value="">Все офферы</option>
                     {% for offer in offers %}
-                    <option value="{{ offer.offer.id }}" {% if offer.offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.offer.name }}</option>
+                    <option value="{{ offer.id }}" {% if offer.offer.id|stringformat:"s" == request.GET.offer_id %}selected{% endif %}>{{ offer.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -84,8 +84,7 @@
                     <option {% if request.GET.enter_type == "by_days" %}selected{% endif %} value="by_days">
                         По дням
                     </option>
-                    <option value="by_hour" {% if request.GET.enter_type == "by_hour" %}selected{% endif %}>По часам</option>
-                    <option value="by_week" {% if request.GET.enter_type == "by_week" %}selected{% endif %}>По неделям</option>
+
                     <option value="by_month" {% if request.GET.enter_type == "by_month" %}selected{% endif %}>По месяцам</option>
                 </select>
             </div>
@@ -221,7 +220,30 @@
 
             opens: 'left',
             locale: {
-                format: 'YYYY-MM-DD'  // Устанавливаем формат даты для совместимости с сервером
+                format: 'YYYY-MM-DD', // Устанавливаем формат даты для совместимости с сервером
+                "daysOfWeek": [
+                    "Вс",
+                    "Пн",
+                    "Вт",
+                    "Ср",
+                    "Чт",
+                    "Пт",
+                    "Сб"
+                ],
+                "monthNames": [
+                    "Январь",
+                    "Февраль",
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь"
+                ],
             },
             ranges: {
                 'Все время': [moment('1970-01-01'), moment()],

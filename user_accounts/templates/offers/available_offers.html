@@ -14,7 +14,14 @@
 <!-- Подключение JS для Choices.js -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
+<style>
+    .choices__list--dropdown,
+    .choices__list[aria-expanded] {
+      word-break: break-word;
+      width: 35ch;
+    }
 
+</style>
 
 <!-- Вкладки -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -55,11 +62,10 @@
 
                     <td>
                         <input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:60px">
-
                     </td>
                     <td></td>
                     <td>
-                        <select id="company_name" name="company_name[]" class="form-select form-select-sm" multiple>
+                        <select id="company_name" name="company_name[]" class="form-select form-select-sm" multiple style="width:35ch;">
                             {% for company_id, company_name in companies %}
                             <option value="{{ company_id }}" {% if company_id|stringformat:"s" in select_companies %}selected{% endif %}>{{ company_name }}</option>
                             {% endfor %}
@@ -113,17 +119,15 @@
                     {% is_mine offer.id as some_name %}
                     {% if some_name %}
                     <td>
-                        <form method="post" action="{% url 'remove_offer' offer.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
-                        </form>
+                        <a href="{% url 'remove_offer' offer.id %}">
+                            <button type="button" class="btn btn-danger btn-sm">Удалить</button>
+                        </a>
                     </td>
                     {% else %}
                     <td>
-                        <form method="post" action="{% url 'take_offer' offer.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success btn-sm">Добавить</button>
-                        </form>
+                        <a href="{% url 'take_offer' offer.id %}">
+                            <button type="button" class="btn btn-success btn-sm">Добавить</button>
+                        </a>
                     </td>
                     {% endif %}
 
@@ -212,22 +216,23 @@
         });
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Найдем все элементы фильтров в форме
-        const filterForm = document.getElementById('form-table');
-        const filterElements = filterForm.querySelectorAll('select, input');
+<!--<script>-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Найдем все элементы фильтров в форме-->
+<!--        const filterForm = document.getElementById('form-table');-->
+<!--        const filterElements = filterForm.querySelectorAll('select, input');-->
 
-        // Добавим обработчик события для каждого элемента формы
-        filterElements.forEach(function(element) {
-            element.addEventListener('change', function() {
-                // Отправляем форму автоматически при изменении любого фильтра
-                filterForm.submit();
-            });
-        });
-    });
-</script>
+<!--        // Добавим обработчик события для каждого элемента формы-->
+<!--        filterElements.forEach(function(element) {-->
+<!--            element.addEventListener('change', function() {-->
+<!--                // Отправляем форму автоматически при изменении любого фильтра-->
+<!--                filterForm.submit();-->
+<!--            });-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
 <script>
+    // choice js
     document.addEventListener('DOMContentLoaded', function() {
         const element = document.getElementById('company_name');
         const choices = new Choices(element, {

@@ -41,9 +41,12 @@ class LeadWallSerializer(serializers.Serializer):
     def create(self, validated_data):
         offer_webmaster = OfferWebmaster.objects.get(unique_token=validated_data['unique_token'])
 
+        processing_status = 'new'
+
         # Проверка на уникальность номера для оффера
         if LeadWall.objects.filter(phone=validated_data['phone'], offer_webmaster=offer_webmaster).exists():
-            raise serializers.ValidationError("Лид с таким номером телефона уже существует для данного оффера.")
+
+            processing_status = 'duplicate'
 
         description = validated_data.get('description', '')
         description_extra = ", ".join(filter(None, [validated_data.get(f'q{i}') for i in range(1, 6)]))
@@ -59,7 +62,7 @@ class LeadWallSerializer(serializers.Serializer):
             sub_3=validated_data.get('sub_3'),
             sub_4=validated_data.get('sub_4'),
             sub_5=validated_data.get('sub_5'),
-            processing_status='new'
+            processing_status=processing_status
         )
         return lead
 
