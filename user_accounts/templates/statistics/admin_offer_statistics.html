@@ -75,11 +75,12 @@
                     <th>Всего лидов</th>
                     <th>Апрувнутых лидов</th>
                     <th>% Апрува</th>
-                    <th>Цена оффера</th>
-                    <th>Цена лида</th>
-                    <th>Заработано за оффер</th>
-                    <th>Заработано вебом</th>
-                    <th>Заработано</th> <!-- Заработано за оффер - Заработано вебом -->
+                    <th>Цена оффера ₽</th>
+                    <th>Цена лида ₽</th>
+                    <th>Заработано за оффер ₽</th>
+                    <th>Заработано вебом ₽</th>
+                    <th>Заработано ₽</th>
+                    <th>Холд ₽</th>
                 </tr>
             </thead>
             <tbody>
@@ -114,6 +115,7 @@
                                 {% endif %}
 
                                 <td>{{ offer.earned_advertiser }}</td>
+                                <td>{{ offer.hold }}</td>
                             </tr>
                             {% endif %}
                     {% endfor %}
@@ -126,6 +128,7 @@
                                 <td>{{ el.general_stats.approved_leads_sum }}</td>
                                 <td colspan="5"></td>
                                 <td>{{ el.general_stats.earned_advertiser_sum }}</td>
+                                <td>{{ el.general_stats.hold_sum }}</td>
                             </tr>
                     {% endif %}
 

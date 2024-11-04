@@ -6,7 +6,12 @@
             {% if advertiser_profile.partner_card.is_approved %}
                 <a href="{% url 'view_partner_card' %}" class="list-group-item list-group-item-action">Депозит</a>
                 <a href="{% url 'advertiser_offers' %}" class="list-group-item list-group-item-action">Офферы</a>
-                <a href="{% url 'advertiser_leads' %}" class="list-group-item list-group-item-action">Лидвол</a>
+                {% if user.is_superuser %}
+                    <a href="{% url 'admin_leads' %}" class="list-group-item list-group-item-action">Лидвол</a>
+                {% else %}
+                    <a href="{% url 'advertiser_leads' %}" class="list-group-item list-group-item-action">Лидвол</a>
+                {% endif %}
+
                 <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action"> Статистика</a>
                 <a href="{% url 'advertiser_financial_statistics' %}" class="list-group-item list-group-item-action">Финансы</a>
                 {% else %}
@@ -23,8 +28,6 @@
 
         {% if user.is_superuser %}
             <a href="{% url 'admin_offer_statistics' %}" class="list-group-item list-group-item-action">Admin Статистика</a>
-        {% else %}
-            <a href="{% url 'advertiser_offer_statistics' %}" class="list-group-item list-group-item-action">Статистика</a>
         {% endif %}
 
     {% endif %}

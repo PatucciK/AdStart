@@ -68,7 +68,9 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Оффер'
         verbose_name_plural = 'Офферы'
-
+        permissions = [
+            ("change_lead_price", "Can change lead_price field"),
+        ]
 
 class OfferArchive(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='archives')
@@ -265,3 +267,19 @@ class LeadComment(models.Model):
         verbose_name_plural = 'Комментарии к лидам'
 
 
+class ChangeRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    target_object_id = models.PositiveIntegerField()
+    target_model = models.CharField(max_length=50)  # Имя модели, например, "Offer"
+    field_name = models.CharField(max_length=50)  # Имя поля, которое нужно изменить
+    current_value = models.TextField()  # Текущее значение поля
+    requested_value = models.TextField()  # Новое значение, которое пользователь хочет установить
+    approved = models.BooleanField(default=False)  # Поле для одобрения запроса администратором
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Change request by {self.user} for {self.field_name} in {self.target_model}"
+
+    class Meta:
+        verbose_name = 'Запрос на изменение лида'
+        verbose_name_plural = 'Запрос на изменение'

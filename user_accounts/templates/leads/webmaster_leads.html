@@ -139,7 +139,7 @@
                             <p ><strong>{{ lead.comments.last.user.username }}</strong> ({{ lead.comments.last.created_at|date:"d.m.Y H:i:s" }}):</p>
                             <p>{{ lead.comments.last.text }}</p>
                         </div>
-                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}" type="button">Посмотреть все комментарии</button>
+<!--                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}" type="button">Посмотреть все комментарии</button>-->
                         <div class="all-comments" id="all-comments-{{ lead.id }}" style="display: none;">
 
 
@@ -149,7 +149,10 @@
                                 <p>{{ comment.text }}</p>
                             </div>
                             {% endfor %}
+
                         </div>
+                        <button class="btn btn-sm btn-primary show-all-comments" data-lead-id="{{ lead.id }}" type="button">Посмотреть все комментарии</button>
+
                         {% else %}
                         <p>Нет комментариев</p>
                         {% endif %}
@@ -210,7 +213,7 @@
                     if (commentsDiv.style.display === 'none') {
                         commentsDiv.style.display = 'block';
                         commentsForstDiv.style.display = 'none';
-                        this.style.display = 'none'; // Скрываем кнопку после показа всех комментариев
+
                     } else {
                         commentsDiv.style.display = 'none';
                     }
@@ -218,19 +221,19 @@
             });
         });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Найдем все элементы фильтров в форме
-            const filterForm = document.getElementById('filter-form');
-            const filterElements = filterForm.querySelectorAll('select, input');
+<!--    <script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            // Найдем все элементы фильтров в форме-->
+<!--            const filterForm = document.getElementById('filter-form');-->
+<!--            const filterElements = filterForm.querySelectorAll('select, input');-->
 
-            // Добавим обработчик события для каждого элемента формы
-            filterElements.forEach(function(element) {
-                element.addEventListener('change', function() {
-                    // Отправляем форму автоматически при изменении любого фильтра
-                    filterForm.submit();
-                });
-            });
-        });
-    </script>
+<!--            // Добавим обработчик события для каждого элемента формы-->
+<!--            filterElements.forEach(function(element) {-->
+<!--                element.addEventListener('change', function() {-->
+<!--                    // Отправляем форму автоматически при изменении любого фильтра-->
+<!--                    filterForm.submit();-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
 {% endblock %}

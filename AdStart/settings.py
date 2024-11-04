@@ -207,5 +207,5 @@ EMAIL_HOST = 'smtp.mail.ru'  # Адрес вашего SMTP-сервера
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'adstartpartner@mail.ru'
-EMAIL_HOST_PASSWORD = 'ki899TTiQPmvVwhDDBHg'
+EMAIL_HOST_PASSWORD = 'ki899TTiQPmvVwhDDBHgЦ'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

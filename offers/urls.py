@@ -20,6 +20,7 @@ from .views import (
     AdminOfferStatisticsView,
     AdvertiserFinancialStatisticsView,
     AdvertiserLeadsView,
+    AdminLeadsView,
     WebmasterClicksView,
     add_comment,
     download_offer_archive, WebmasterTrashLeadsView,
@@ -48,7 +49,6 @@ urlpatterns += [
     path('webmaster/leads/', WebmasterLeadsView.as_view(), name='webmaster_leads'),
     path('webmaster/leads/trash', WebmasterTrashLeadsView.as_view(), name='webmaster_trash_leads'),
 
-
     path('advertiser/statistics/offers/', AdvertiserOfferStatisticsView.as_view(), name='advertiser_offer_statistics'),
     path('advertiser/statistics/financial/', AdvertiserFinancialStatisticsView.as_view(),
          name='advertiser_financial_statistics'),
@@ -56,6 +56,8 @@ urlpatterns += [
     path('admin/statistics/offers/', AdminOfferStatisticsView.as_view(), name='admin_offer_statistics'),
 
     path('advertiser/leads/', AdvertiserLeadsView.as_view(), name='advertiser_leads'),
+    path('admin/leads/', AdminLeadsView.as_view(), name='admin_leads'),
+
     path('add-comment/', add_comment, name='add_comment'),
 
     path('download-archive/<int:pk>/', download_offer_archive, name='download_offer_archive'),

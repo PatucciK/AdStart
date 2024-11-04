@@ -1,6 +1,7 @@
 import os
 from calendar import month
 from collections import defaultdict
+from lib2to3.fixes.fix_input import context
 
 import requests
 from datetime import datetime, timedelta
@@ -85,9 +86,41 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         offer = Offer.objects.filter(id=self.kwargs['pk'])
-        print(offer)
         return offer
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        offer_web = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'])
+        web_ids = [i['webmaster_id'] for i in offer_web.values('webmaster_id')]
+        web = Webmaster.objects.all()
+        free_web = []
+
+        for obj in web:
+            if obj.id not in web_ids:
+                free_web.append(obj)
+
+        context['offer_web'] = offer_web
+        context['webmasters'] = free_web
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        action = request.POST.get('action')
+
+        webmaster_id  = request.POST.get('webmaster')
+        offer = get_object_or_404(Offer, pk=kwargs['pk'])
+        webmaster = Webmaster.objects.get(id=webmaster_id)
+
+        if action == 'add_offerweb':
+            if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
+                OfferWebmaster.objects.create(offer=offer, webmaster=webmaster,
+                                              validation_data_lead=offer.validation_data_web)
+        elif action == 'remove_offerweb':
+            if OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
+                OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
+
+        return redirect('offer_detail', pk=offer.pk)
 
 class PauseOfferView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
@@ -121,6 +154,9 @@ class DeleteOfferView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Offer
     template_name = 'offers/offer_confirm_delete.html'
     success_url = reverse_lazy('advertiser_offers')
+
+    def post(self, request, *args, **kwargs):
+        pass
 
     def test_func(self):
         offer = self.get_object()
@@ -255,6 +291,7 @@ def remove_offer(request, offer_id):
         OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
 
 
 class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
@@ -467,6 +504,138 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         advertiser = get_object_or_404(Advertiser, user=self.request.user)
         queryset = LeadWall.objects.filter(offer_webmaster__offer__partner_card__advertiser=advertiser).exclude(processing_status__in=['trash', 'duplicate']).order_by('-id')
+
+        el_id = self.request.GET.get('id')
+
+        offer_id = self.request.GET.get('offer_id')
+        status = self.request.GET.get('lead_status')
+        domain_name = self.request.GET.get('domain_name')
+        name = self.request.GET.get('name')
+        processing_status = self.request.GET.get('precessing_status')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        sub_filters = {f"sub_{i}": self.request.GET.get(f"sub_{i}") for i in range(1, 6)}
+        geo = self.request.GET.get("geo")
+        phone_number = self.request.GET.get("phone_number")
+
+
+        if el_id:
+            queryset = queryset.filter(id=el_id)
+
+        if offer_id:
+            queryset = queryset.filter(offer_webmaster__offer__id=offer_id)
+
+        if domain_name:
+            queryset = queryset.filter(domain=domain_name)
+
+        if name:
+            queryset = queryset.filter(name=name)
+
+        if status:
+            queryset = queryset.filter(status=status)
+
+        if processing_status:
+            queryset = queryset.filter(processing_status=processing_status)
+
+        if start_date:
+            queryset = queryset.filter(created_at__gte=start_date)
+
+        if end_date:
+            queryset = queryset.filter(created_at__lte=end_date)
+
+        for key, value in sub_filters.items():
+            if value:
+                queryset = queryset.filter(**{key: value})
+
+        if geo:
+            query = Q()
+            for el in geo.split():
+                query |= Q(geo__icontains=el)  # Ищем по каждому слову
+
+            # Применяем фильтр с использованием Q-объекта
+            queryset = queryset.filter(query)
+
+        if phone_number:
+            queryset = queryset.filter(phone=phone_number)
+
+        return queryset
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            lead_id = request.POST.get('lead_id')
+            text = request.POST.get('text')
+            new_processing_status = request.POST.get('processing_status')
+
+            if text:  # Если это добавление комментария
+                lead = get_object_or_404(LeadWall, id=lead_id)
+                comment = LeadComment.objects.create(user=request.user, lead=lead, text=text)
+                return JsonResponse({'success': True, 'comment': {'user': comment.user.username, 'text': comment.text,
+                                                                  'created_at': comment.created_at}})
+
+            if new_processing_status:
+                # Если это изменение статуса обработки
+                lead = get_object_or_404(LeadWall, id=lead_id)
+                offer_web = OfferWebmaster.objects.get(id=lead.offer_webmaster_id)
+                offer = Offer.objects.get(id=offer_web.offer_id)
+
+                if lead.processing_status in ['new', 'no_response']:
+                    lead.processing_status = new_processing_status
+
+                    if new_processing_status in offer.validation_data_lead:
+                        lead.status = 'paid'
+                        lead.offer_webmaster.offer.partner_card.deposit -= lead.offer_webmaster.offer.offer_price
+                        lead.offer_webmaster.offer.partner_card.save()
+
+                    if new_processing_status in offer.validation_data_web:
+                        lead.offer_webmaster.webmaster.balance += lead.offer_webmaster.offer.lead_price
+                        lead.offer_webmaster.webmaster.save()
+
+                    elif new_processing_status == 'rejected':
+                        lead.status = 'cancelled'
+
+                    lead.save()
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'message': 'Нельзя изменить на этот статус.'})
+
+        return JsonResponse({'success': False, 'message': 'Неверный запрос или метод запроса не является AJAX.'},
+                            status=400)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Передаем форматированные строки дат в шаблон
+        get_date = self.request.GET.get('date')
+
+        if get_date:
+            get_date = get_date.split(' - ')
+            context['start_date'] = get_date[0].replace('/', '-')
+            context['end_date'] = get_date[1].replace('/', '-')
+        else:
+            today = datetime.now()
+            week_ago = today - timedelta(days=7)
+            context['start_date'] = week_ago.strftime('%m/%d/%Y')
+            context['end_date'] = today.strftime('%m/%d/%Y')
+
+        context['offers'] = Offer.objects.filter(partner_card__advertiser=self.request.user.advertiser)
+
+        # Calculate date range
+        return context
+
+
+class AdminLeadsView(LoginRequiredMixin, ListView):
+    model = LeadWall
+    template_name = 'leads/admin_leads.html'
+    context_object_name = 'leads'
+    paginate_by = 25
+
+    def get_queryset(self):
+        advertiser = get_object_or_404(Advertiser, user=self.request.user)
+        queryset = LeadWall.objects.all().order_by('-id')
 
         el_id = self.request.GET.get('id')
 
@@ -1045,7 +1214,8 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
                 general_stat = {
                     'unique_leads_sum': 0,
                     'approved_leads_sum': 0,
-                    'earned_advertiser_sum': 0
+                    'earned_advertiser_sum': 0,
+                    'hold_sum': 0
                 }
 
                 for stat in offer_stats:
@@ -1064,9 +1234,21 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
 
                     stat['earned_advertiser'] = earned_offer - earned_web
 
+                    offer_price = 0
+                    if stat['offer_webmaster__offer__offer_price']:
+                        offer_price = float(stat['offer_webmaster__offer__offer_price'])
+
+                    lead_price = 0
+                    if stat['offer_webmaster__offer__lead_price']:
+                        lead_price = float(stat['offer_webmaster__offer__lead_price'])
+
+
+                    stat['hold'] = offer_price - lead_price
+
                     general_stat['unique_leads_sum'] += stat['unique_leads']
                     general_stat['approved_leads_sum'] += stat['approved_leads']
                     general_stat['earned_advertiser_sum'] += earned_offer - earned_web
+                    general_stat['hold_sum'] += stat['hold']
 
 
                 per['offer_stats'] = offer_stats

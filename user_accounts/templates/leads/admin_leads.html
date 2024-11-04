@@ -3,7 +3,7 @@
 {% block title %}Лиды рекламодателя{% endblock %}
 
 {% block page_title %}
-    <h2 class="text-center my-4">Лиды рекламодателя</h2>
+    <h2 class="text-center my-4">Лиды</h2>
 {% endblock %}
 
 
@@ -25,7 +25,7 @@
                         <th>Статус</th>
                         <th>Состояние</th>
                         <th>Оффер</th>
-
+                        <th>Веб.</th>
                         <th>Дата создания</th>
                         <th>Дата изменения статуса</th>
                         <th>Комментарий</th>
@@ -65,7 +65,7 @@
                                     {% endfor %}
                             </select>
                             </td>
-
+                            <td></td>
                             <td>
                                 <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
                             </td>
@@ -93,13 +93,18 @@
                                     </option>
                                 {% endfor %}
                             </select>
+
                             <button class="btn btn-primary btn-sm update-processing-status" data-lead-id="{{ lead.id }}" type="button">
                                 Сохранить изменения
                             </button>
 
                         </td>
                         <td>{{ lead.get_status_display }}</td>
-
+                        <td>
+                            <a href="{% url 'webmaster_offer_detail' lead.offer_webmaster.offer.id %}">
+                                {{ lead.offer_webmaster.offer.name|default_if_none:"" }}
+                            </a>
+                        </td>
                         <td>
                             {{ lead.offer_webmaster.webmaster.user.username }}
                         </td>
