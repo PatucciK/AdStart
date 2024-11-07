@@ -76,7 +76,7 @@
                     </tr>
 
                     {% for lead in page_obj %}
-                    <tr class="{% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}table-warning{% elif lead.processing_status == 'rejected' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
+                    <tr class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
                         <td>{{ lead.domain }}</td>
                         <td>{{ lead.id }}</td>
                         <td>{{ lead.name }}</td>
@@ -88,9 +88,11 @@
 
                             <select class="form-select form-select-sm lead-processing-status" data-lead-id="{{ lead.id }}">
                                 {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
+                                    {% if status != 'trash' and status != 'duplicate'%}
                                     <option value="{{ status }}" {% if lead.processing_status == status %}selected{% endif %}>
                                         {{ label }}
                                     </option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                             <button class="btn btn-primary btn-sm update-processing-status" data-lead-id="{{ lead.id }}" type="button">
@@ -101,7 +103,11 @@
                         <td>{{ lead.get_status_display }}</td>
 
                         <td>
-                            {{ lead.offer_webmaster.webmaster.user.username }}
+                            <a href="{% url 'offer_detail' lead.offer_webmaster.offer.id %}">
+                                {{ lead.offer_webmaster.offer.name }}
+
+                            </a>
+
                         </td>
                         <td>{{ lead.created_at|date:"d.m.Y" }}</td>
                         <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
@@ -197,6 +203,7 @@
                         location.reload(); // Перезагрузить страницу после успешного обновления
                     } else {
                         alert('Ошибка при обновлении статуса обработки: ' + data.message);
+                        console.log(data.message);
                     }
                 })
                 .catch(error => {
@@ -257,19 +264,19 @@
         });
     })
 </script>
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Найдем все элементы фильтров в форме
-            const filterForm = document.getElementById('filter-form');
-            const filterElements = filterForm.querySelectorAll('select, input');
+<!--<script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            // Найдем все элементы фильтров в форме-->
+<!--            const filterForm = document.getElementById('filter-form');-->
+<!--            const filterElements = filterForm.querySelectorAll('select, input');-->
 
-            // Добавим обработчик события для каждого элемента формы
-            filterElements.forEach(function(element) {
-                element.addEventListener('change', function() {
-                    // Отправляем форму автоматически при изменении любого фильтра
-                    filterForm.submit();
-                });
-            });
-        });
-    </script>
+<!--            // Добавим обработчик события для каждого элемента формы-->
+<!--            filterElements.forEach(function(element) {-->
+<!--                element.addEventListener('change', function() {-->
+<!--                    // Отправляем форму автоматически при изменении любого фильтра-->
+<!--                    filterForm.submit();-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
 {% endblock %}

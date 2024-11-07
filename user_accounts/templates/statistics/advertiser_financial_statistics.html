@@ -44,7 +44,7 @@
             <thead>
                 <tr>
                     <th>Оффер</th>
-                    <th>Вебмастер</th>
+                    <th>Всего лидов</th>
                     <th>Принятые лиды</th>
                     <th>Выплачено ₽</th>
                     <th>Холд ₽</th>
@@ -60,7 +60,7 @@
                             {{ stat.offer_webmaster__offer__name }}
                         {% endif %}
                     </td>
-                    <td>{{ stat.offer_webmaster__webmaster__user__username }}</td>
+                    <td>{{ stat.unique_leads }}</td>
                     <td>{{ stat.accepted_leads }}</td>
 
 

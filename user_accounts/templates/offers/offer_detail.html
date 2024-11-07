@@ -25,6 +25,8 @@
                 <p><strong>Дата договора:</strong> {{ offer.contract_date }}</p>
                 <p><strong>Статус:</strong> {{ offer.get_status_display }}</p>
                 <p><strong>Публичный статус:</strong> {{ offer.get_public_status_display }}</p>
+                <br>
+                <p><strong>Валидация:</strong> {{ offer.validation_data_web }}</p>
 
                 {% if user.is_superuser %}
 
@@ -57,6 +59,7 @@
                 {% endif %}
             </div>
         </div>
+        {% if user.is_superuser %}
 
         <div class="container mt-5">
             <h4 class="mb-3">Управление командой</h4>
@@ -88,6 +91,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+
 
             <!-- Кнопка для открытия модального окна -->
             <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#addWebmasterModal">Добавить вебмастера</button>
@@ -129,7 +133,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
 
     </div>
 </div>

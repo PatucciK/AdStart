@@ -47,6 +47,7 @@
                 <tr>
                     <th>Дата (период)</th>
                     <th>Оффер</th>
+                    <th>Всего лидов</th>
                     <th>Принятые лиды</th>
                     <th>Заработано ₽</th>
                     <th>Холд ₽</th>
@@ -63,6 +64,7 @@
                             {{ stat.offer_webmaster__offer__name }}
                         {% endif %}
                     </td>
+                    <td>{{ stat.unique_leads }}</td>
                     <td>{{ stat.accepted_leads }}</td>
                     <td>{% if stat.earned %}
                     {{ stat.earned }}
@@ -82,6 +84,7 @@
                 <tr>
                     <td><strong>Итого</strong></td>
                     <td></td>
+                    <td><strong>{{ result.res_total_lead }}</strong></td>
                     <td><strong>{{ result.res_accepted_leads }}</strong></td>
                     <td> <strong>{{ result.res_earned }}</strong></td>
                     <td><strong>{{ result.res_hold }}</strong></td>

@@ -16,6 +16,11 @@
                     <th>Название</th>
                     <th>Описание услуг</th>
                     <th>Цена за лид</th>
+
+                    {% if user.is_superuser %}
+                        <th>Цена за оффер</th>
+                    {% endif%}
+
                     <th>Статус оффера</th>
                     <th>Актуальность</th>
                     <th>Действия</th>
@@ -27,7 +32,12 @@
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.id }}</a></td>
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.name }}</a></td>
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.service_description|truncatewords:20|striptags }}</a></td>
+                    <td>{{ offer.lead_price }} руб.</td>
+
+                    {% if user.is_superuser %}
                     <td>{{ offer.offer_price }} руб.</td>
+                    {% endif%}
+
                     <td>{{ offer.get_public_status_display }}</td>
                     <td>{{ offer.get_status_display }}</td>
                     <td>
