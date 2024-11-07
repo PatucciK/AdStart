@@ -55,7 +55,13 @@ class AdvertiserOffersView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         advertiser = Advertiser.objects.get(user=self.request.user)
         # Добавьте сортировку здесь, например, по полю id или любому другому
-        return Offer.objects.filter(partner_card__advertiser=advertiser).order_by('-id')
+        if self.request.user.is_superuser:
+            offers = Offer.objects.all().order_by('-id')
+
+        else:
+            offers = Offer.objects.filter(partner_card__advertiser=advertiser).order_by('-id')
+
+        return offers
 
 
 
@@ -582,7 +588,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
                 offer_web = OfferWebmaster.objects.get(id=lead.offer_webmaster_id)
                 offer = Offer.objects.get(id=offer_web.offer_id)
 
-                if lead.processing_status in ['new', 'no_response']:
+                if lead.status in ["on_hold", "cancelled"]:
                     lead.processing_status = new_processing_status
 
                     if new_processing_status in offer.validation_data_lead:
@@ -982,6 +988,7 @@ class WebmasterFinancialStatisticsView(LoginRequiredMixin, View):
 
         # Financial stats
         financial_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id').annotate(
+            unique_leads=Count('id', distinct=True),
             accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
             earned=Sum('offer_webmaster__offer__lead_price', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
             on_hold=Sum('offer_webmaster__offer__lead_price',
@@ -1004,7 +1011,8 @@ class WebmasterFinancialStatisticsView(LoginRequiredMixin, View):
         result = {
             "res_accepted_leads": sum([stat['accepted_leads'] for stat in financial_stats]),
             "res_earned": sum([int(stat['earned']) for stat in financial_stats if stat['earned']]),
-            "res_hold": sum([int(stat['on_hold']) for stat in financial_stats if stat['on_hold']])
+            "res_hold": sum([int(stat['on_hold']) for stat in financial_stats if stat['on_hold']]),
+            "res_total_lead: ": sum([int(stat['unique_leads']) for stat in financial_stats])
         }
 
         context = {
@@ -1122,7 +1130,7 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
                 accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
                 earned=Sum('offer_webmaster__offer__offer_price',
                            filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
-                on_hold=Sum('offer_webmaster__offer__lead_price',
+                on_hold=Sum('offer_webmaster__offer__offer_price',
                             filter=Q(status="on_hold")),
                 sum_konv=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'],
                                               processing_status__in=['trash', 'duplicate']))
@@ -1219,16 +1227,18 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
                 }
 
                 for stat in offer_stats:
-                    stat['approve_percent'] = (stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
-                                                                                                           'unique_leads'] > 0 else 0
+                    stat['approve_percent'] = round((stat['approved_leads'] / stat['unique_leads'] * 100) if stat[
+                                                                                                           'unique_leads'] > 0 else 0, 2)
 
                     if stat['earned_offer']:
-                        earned_offer = int(stat['earned_offer'])
+                        earned_offer = float(stat['earned_offer'])
+                        stat['earned_offer'] =float(stat['earned_offer'])
                     else:
                         earned_offer= 0
 
                     if stat['earned_web']:
-                        earned_web = int(stat['earned_web'])
+                        earned_web = float(stat['earned_web'])
+                        stat['earned_web'] = float(stat['earned_web'])
                     else:
                         earned_web= 0
 
@@ -1242,13 +1252,17 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
                     if stat['offer_webmaster__offer__lead_price']:
                         lead_price = float(stat['offer_webmaster__offer__lead_price'])
 
-
-                    stat['hold'] = offer_price - lead_price
+                    on_hold = 0
+                    if stat['on_hold']:
+                        on_hold = earned_offer - earned_web
+                        stat['on_hold'] = on_hold
+                    else:
+                        stat['on_hold'] = 0
 
                     general_stat['unique_leads_sum'] += stat['unique_leads']
                     general_stat['approved_leads_sum'] += stat['approved_leads']
                     general_stat['earned_advertiser_sum'] += earned_offer - earned_web
-                    general_stat['hold_sum'] += stat['hold']
+                    general_stat['hold_sum'] += on_hold
 
 
                 per['offer_stats'] = offer_stats
@@ -1263,7 +1277,7 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
             'all_data': all_data,
             'partner_cards': partner_crd,
             'webmasters': webmasters,
-            'select_webmasters': self.request.GET.getlist('webmasters[]')
+            'select_webmasters': self.request.GET.getlist('webmasters[]'),
         }
 
         return render(request, self.template_name, context)
@@ -1275,7 +1289,10 @@ class AdvertiserFinancialStatisticsView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         advertiser = get_object_or_404(Advertiser, user=request.user)
-        offers = Offer.objects.filter(partner_card__advertiser=advertiser)
+        if request.user.is_superuser:
+            offers = Offer.objects.all()
+        else:
+            offers = Offer.objects.filter(partner_card__advertiser=advertiser)
 
         get_date = self.request.GET.get('date')
 
@@ -1308,6 +1325,7 @@ class AdvertiserFinancialStatisticsView(LoginRequiredMixin, View):
 
         # Финансовая статистика
         financial_stats = leads.values('offer_webmaster__offer__name', 'offer_webmaster__offer__id', 'offer_webmaster__webmaster__user__username').annotate(
+            unique_leads=Count('id', distinct=True),
             accepted_leads=Count('id', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
             spent=Sum('offer_webmaster__offer__offer_price', filter=Q(status__in=['visit', 'appointment', 'paid', 'expired'])),
             on_hold=Sum('offer_webmaster__offer__offer_price',
