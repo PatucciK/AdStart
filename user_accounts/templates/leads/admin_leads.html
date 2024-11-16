@@ -76,7 +76,7 @@
                     </tr>
 
                     {% for lead in page_obj %}
-                    <tr class="{% if lead.processing_status == 'new' or lead.processing_status == 'no_response' %}table-warning{% elif lead.processing_status == 'rejected' %}table-danger{% elif lead.status == 'paid' %}table-success{% endif %}">
+                    <tr class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
                         <td>{{ lead.domain }}</td>
                         <td>{{ lead.id }}</td>
                         <td>{{ lead.name }}</td>
@@ -262,19 +262,19 @@
         });
     })
 </script>
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Найдем все элементы фильтров в форме
-            const filterForm = document.getElementById('filter-form');
-            const filterElements = filterForm.querySelectorAll('select, input');
+    <!--<script>-->
+    <!--        document.addEventListener('DOMContentLoaded', function() {-->
+    <!--            // Найдем все элементы фильтров в форме-->
+    <!--            const filterForm = document.getElementById('filter-form');-->
+    <!--            const filterElements = filterForm.querySelectorAll('select, input');-->
 
-            // Добавим обработчик события для каждого элемента формы
-            filterElements.forEach(function(element) {
-                element.addEventListener('change', function() {
-                    // Отправляем форму автоматически при изменении любого фильтра
-                    filterForm.submit();
-                });
-            });
-        });
-    </script>
+    <!--            // Добавим обработчик события для каждого элемента формы-->
+    <!--            filterElements.forEach(function(element) {-->
+    <!--                element.addEventListener('change', function() {-->
+    <!--                    // Отправляем форму автоматически при изменении любого фильтра-->
+    <!--                    filterForm.submit();-->
+    <!--                });-->
+    <!--            });-->
+    <!--        });-->
+    <!--    </script>-->
 {% endblock %}

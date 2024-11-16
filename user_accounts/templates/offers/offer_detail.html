@@ -69,6 +69,7 @@
                     <tr>
                         <th>Вебмастер</th>
                         <th>Валидация</th>
+                        <th>Выплата</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -78,6 +79,7 @@
                     <tr>
                         <td>{{ el.webmaster.user.username }}</td>
                         <td>{{ el.validation_data_lead }}</td>
+                        <td>{{ el.rate_of_pay }}</td>
                         <td>
                              <form method="post" action="{% url 'offer_detail' offer.id %}">
                                 {% csrf_token %}
@@ -122,12 +124,15 @@
                                         <!-- Добавьте другие варианты вебмастеров, если нужно -->
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="payoutInput">Сумма выплаты</label>
+                                    <input type="number" class="form-control" id="payoutInput" name="payoutInput" placeholder="Сумма выплаты">
+                                </div>
                                 <button type="submit" class="btn btn-primary">Сохранить</button>
                             </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-
                         </div>
                     </div>
                 </div>

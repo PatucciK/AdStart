@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'ckeditor',
+    'django_celery_beat',
     'content',
     'partner_cards',
     'offers',

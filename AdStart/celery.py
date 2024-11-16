@@ -11,7 +11,6 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Убедитесь, что задачи автоматически находятся
 app.autodiscover_tasks(['offers'])  # Указываем приложение с задачами
 
-
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     from offers.tasks import check_for_repository_updates

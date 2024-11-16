@@ -46,22 +46,27 @@ class OfferAdmin(admin.ModelAdmin):
                 old_obj = self.model.objects.get(pk=obj.pk)  # Получаем старую версию объекта
                 old_value = getattr(old_obj, 'lead_price')
                 # Вместо сохранения объекта создаем запрос на изменение
-                if old_value != obj.lead_price:
-                    ChangeRequest.objects.create(
-                        user=request.user,
-                        target_object_id=obj.id,
-                        target_model='Offer',
-                        field_name='lead_price',
-                        current_value=old_value,
-                        requested_value=obj.lead_price
-                    )
-                else:
-                    super().save_model(request, obj, form, change)
+                if old_value != obj.lead_price and not request.user.is_superuser:
+                        ChangeRequest.objects.create(
+                            user=request.user,
+                            target_object_id=obj.id,
+                            target_model='Offer',
+                            field_name='lead_price',
+                            current_value=old_value,
+                            requested_value=obj.lead_price
+                        )
+
+
+            super().save_model(request, obj, form, change)
+
 
 @admin.register(ChangeRequest)
 class ChangeRequestAdmin(admin.ModelAdmin):
-    list_display = ('user', 'target_model', 'field_name', 'current_value', 'requested_value', 'created_at')
+    list_display = ('user', 'field_name', 'offer_price','current_value', 'requested_value', 'created_at')
     actions = ['approve_changes']
+
+    def offer_price(self, obj):
+        return Offer.objects.get(id=obj.target_object_id).offer_price
 
     def approve_changes(self, request, queryset):
         for change_request in queryset:

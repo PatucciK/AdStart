@@ -46,6 +46,12 @@ def get_geolocation(ip):
     except Exception as e:
         return "Unknown Location"
 
+def schedule_update(request, pk):
+    # Запуск задачи с отложенным выполнением через 24 часа
+    update_record.apply_async((pk,), countdown=86400)  # 86400 секунд = 24 часа
+    return HttpResponse(f'Задача на обновление записи {pk} запланирована.')
+
+
 class AdvertiserOffersView(LoginRequiredMixin, ListView):
     model = Offer
     template_name = 'offers/advertiser_offers.html'
@@ -114,14 +120,17 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
         action = request.POST.get('action')
 
-        webmaster_id  = request.POST.get('webmaster')
+        webmaster_id = request.POST.get('webmaster')
+        payout_input = request.POST.get('payoutInput')
         offer = get_object_or_404(Offer, pk=kwargs['pk'])
         webmaster = Webmaster.objects.get(id=webmaster_id)
-
+        print(payout_input)
         if action == 'add_offerweb':
-            if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
-                OfferWebmaster.objects.create(offer=offer, webmaster=webmaster,
-                                              validation_data_lead=offer.validation_data_web)
+            if int(payout_input) < offer.offer_price:
+                if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
+                    OfferWebmaster.objects.create(offer=offer, webmaster=webmaster,
+                                                  validation_data_lead=offer.validation_data_web, rate_of_pay=payout_input)
+
         elif action == 'remove_offerweb':
             if OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
                 OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
@@ -283,7 +292,7 @@ def take_offer(request, offer_id):
     webmaster = get_object_or_404(Webmaster, user=request.user)
     # Проверка, что связь еще не создана
     if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
-        OfferWebmaster.objects.create(offer=offer, webmaster=webmaster, validation_data_lead=offer.validation_data_web)
+        OfferWebmaster.objects.create(offer=offer, webmaster=webmaster, validation_data_lead=offer.validation_data_web, rate_of_pay=offer.lead_price)
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -452,10 +461,6 @@ class WebmasterTrashLeadsView(LoginRequiredMixin, ListView):
         if end_date:
             queryset = queryset.filter(created_at__lte=end_date)
 
-        for key, value in sub_filters.items():
-            if value:
-                queryset = queryset.filter(**{key: value})
-
         if geo:
             query = Q()
             for el in geo.split():
@@ -520,7 +525,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
         processing_status = self.request.GET.get('precessing_status')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
-        sub_filters = {f"sub_{i}": self.request.GET.get(f"sub_{i}") for i in range(1, 6)}
+
         geo = self.request.GET.get("geo")
         phone_number = self.request.GET.get("phone_number")
 
@@ -548,10 +553,6 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
 
         if end_date:
             queryset = queryset.filter(created_at__lte=end_date)
-
-        for key, value in sub_filters.items():
-            if value:
-                queryset = queryset.filter(**{key: value})
 
         if geo:
             query = Q()
@@ -591,7 +592,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
                 if lead.status in ["on_hold", "cancelled"]:
                     lead.processing_status = new_processing_status
 
-                    if new_processing_status in offer.validation_data_lead:
+                    if (new_processing_status in offer.validation_data_lead) or new_processing_status in ["expired"]:
                         lead.status = 'paid'
                         lead.offer_webmaster.offer.partner_card.deposit -= lead.offer_webmaster.offer.offer_price
                         lead.offer_webmaster.offer.partner_card.save()
@@ -600,7 +601,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
                         lead.offer_webmaster.webmaster.balance += lead.offer_webmaster.offer.lead_price
                         lead.offer_webmaster.webmaster.save()
 
-                    elif new_processing_status == 'rejected':
+                    if new_processing_status in ['rejected']:
                         lead.status = 'cancelled'
 
                     lead.save()
@@ -720,10 +721,9 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
                 offer_web = OfferWebmaster.objects.get(id=lead.offer_webmaster_id)
                 offer = Offer.objects.get(id=offer_web.offer_id)
 
-                if lead.processing_status in ['new', 'no_response']:
+                if lead.status in ["on_hold", "cancelled"]:
                     lead.processing_status = new_processing_status
-
-                    if new_processing_status in offer.validation_data_lead:
+                    if (new_processing_status in offer.validation_data_lead) or new_processing_status in ["expired"]:
                         lead.status = 'paid'
                         lead.offer_webmaster.offer.partner_card.deposit -= lead.offer_webmaster.offer.offer_price
                         lead.offer_webmaster.offer.partner_card.save()
@@ -732,7 +732,7 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
                         lead.offer_webmaster.webmaster.balance += lead.offer_webmaster.offer.lead_price
                         lead.offer_webmaster.webmaster.save()
 
-                    elif new_processing_status == 'rejected':
+                    if new_processing_status in ['rejected']:
                         lead.status = 'cancelled'
 
                     lead.save()

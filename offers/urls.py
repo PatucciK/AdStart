@@ -24,6 +24,7 @@ from .views import (
     WebmasterClicksView,
     add_comment,
     download_offer_archive, WebmasterTrashLeadsView,
+    schedule_update
 )
 
 urlpatterns = [
@@ -37,6 +38,8 @@ urlpatterns = [
     path('webmaster/statistics/financial/', WebmasterFinancialStatisticsView.as_view(),
          name='webmaster_financial_statistics'),
     path('webmaster/clicks/', WebmasterClicksView.as_view(), name='webmaster_clicks'),
+
+    path('check-and-update/<int:pk>/', schedule_update, name='check_and_update'),
 ]
 
 urlpatterns += [

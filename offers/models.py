@@ -163,7 +163,7 @@ class OfferWebmaster(models.Model):
     metrika_token = models.CharField(max_length=255, verbose_name='Метрика токен', blank=True, null=True)
 
     validation_data_lead = MultiSelectField(choices=VALIDATION_CHOICES, verbose_name='Валидация данных', blank=True)
-
+    rate_of_pay = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Ставка за лид', blank=True, null=True)
 
     def __str__(self):
         return f'{self.offer.name} - {self.webmaster.user.username}'

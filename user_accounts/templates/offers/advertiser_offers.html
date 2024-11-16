@@ -32,12 +32,12 @@
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.id }}</a></td>
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.name }}</a></td>
                     <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.service_description|truncatewords:20|striptags }}</a></td>
-                    <td>{{ offer.lead_price }} руб.</td>
+
 
                     {% if user.is_superuser %}
-                    <td>{{ offer.offer_price }} руб.</td>
+                    <td>{{ offer.lead_price }} руб.</td>
                     {% endif%}
-
+                    <td>{{ offer.offer_price }} руб.</td>
                     <td>{{ offer.get_public_status_display }}</td>
                     <td>{{ offer.get_status_display }}</td>
                     <td>
