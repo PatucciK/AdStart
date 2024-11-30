@@ -86,7 +86,7 @@
                         <td>{{ lead.description_extra|truncatewords:10 }}</td>
                         <td>
 
-                            <select class="form-select form-select-sm lead-processing-status" data-lead-id="{{ lead.id }}">
+                            <select class="form-select form-select-sm lead-processing-status exclude-class" data-lead-id="{{ lead.id }}">
                                 {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
                                     <option value="{{ status }}" {% if lead.processing_status == status %}selected{% endif %}>
                                         {{ label }}
@@ -108,7 +108,7 @@
                         <td>
                             {{ lead.offer_webmaster.webmaster.user.username }}
                         </td>
-                        <td>{{ lead.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ lead.created_at|date:"d.m.Y H:i:s" }}</td>
                         <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
                         <td>
                             {% with latest_comment=lead.comments.last %}
@@ -183,7 +183,7 @@
                 const selectElement = document.querySelector(`select[data-lead-id="${leadId}"]`);
                 const newProcessingStatus = selectElement.value;
 
-                fetch("{% url 'advertiser_leads' %}", {
+                fetch("{% url 'admin_leads' %}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -262,19 +262,22 @@
         });
     })
 </script>
-    <!--<script>-->
-    <!--        document.addEventListener('DOMContentLoaded', function() {-->
-    <!--            // Найдем все элементы фильтров в форме-->
-    <!--            const filterForm = document.getElementById('filter-form');-->
-    <!--            const filterElements = filterForm.querySelectorAll('select, input');-->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Найдем все элементы фильтров в форме
+    const filterForm = document.getElementById('filter-form');
+    const filterElements = filterForm.querySelectorAll('select, input');
 
-    <!--            // Добавим обработчик события для каждого элемента формы-->
-    <!--            filterElements.forEach(function(element) {-->
-    <!--                element.addEventListener('change', function() {-->
-    <!--                    // Отправляем форму автоматически при изменении любого фильтра-->
-    <!--                    filterForm.submit();-->
-    <!--                });-->
-    <!--            });-->
-    <!--        });-->
-    <!--    </script>-->
+    // Добавим обработчик события для каждого элемента формы
+    filterElements.forEach(function(element) {
+        // Исключаем элементы с классом "exclude-class"
+        if (!element.classList.contains('exclude-class')) {
+            element.addEventListener('change', function() {
+                // Отправляем форму автоматически при изменении любого фильтра
+                filterForm.submit();
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

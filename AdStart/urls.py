@@ -40,6 +40,7 @@ urlpatterns = [
     path('content/', include('content.urls')),
     path('partner_cards/', include('partner_cards.urls')),
     path('offers/', include('offers.urls')),
+    path('sites/', include('sites.urls')),
 
     # API documentation
     path('api/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

@@ -1,5 +1,6 @@
 from django.db import models
 from partner_cards.models import PartnerCard
+from django.utils.timezone import now
 from user_accounts.models import Webmaster
 from django.contrib.auth.models import User
 from datetime import date
@@ -8,6 +9,10 @@ import os
 from git import Repo
 from ckeditor.fields import RichTextField
 from multiselectfield import MultiSelectField
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class Offer(models.Model):
     STATUS_CHOICES = [

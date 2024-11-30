@@ -12,8 +12,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
-from django.conf.global_settings import DEFAULT_FROM_EMAIL
+from django.conf.global_settings import DEFAULT_FROM_EMAIL, STATICFILES_DIRS
 
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -49,9 +50,12 @@ INSTALLED_APPS = [
     'drf_yasg',
     'ckeditor',
     'django_celery_beat',
+    'corsheaders',
     'content',
     'partner_cards',
     'offers',
+    'finance',
+    'sites'
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -72,6 +76,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,6 +85,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 LOGGING = {
     'version': 1,
@@ -131,6 +139,19 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'AdStart',  # Имя базы данных
+#         'USER': 'postgres',      # Имя пользователя
+#         'PASSWORD': 'root',  # Пароль
+#         'HOST': 'localhost',    # Локальный сервер
+#         'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
+#     }
+# }
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -152,16 +173,34 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Используем Redis как брокер
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
-TIME_ZONE = 'UTC'
+# Настройки сериализации задач
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
+
+LANGUAGE_CODE = 'ru-ru'
+USE_TZ = True
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
-USE_TZ = True
 
-STATIC_URL = 'static/'
 
+STATIC_URL = '/static/'
+
+# Дополнительные директории для поиска статических файлов
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
 # Media files (Uploaded by users, etc.)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

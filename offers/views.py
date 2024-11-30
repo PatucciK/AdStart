@@ -102,8 +102,8 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        offer_web = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'])
-        web_ids = [i['webmaster_id'] for i in offer_web.values('webmaster_id')]
+        offer_webmaster = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'])
+        web_ids = [i['webmaster_id'] for i in offer_webmaster.values('webmaster_id')]
         web = Webmaster.objects.all()
         free_web = []
 
@@ -111,7 +111,7 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
             if obj.id not in web_ids:
                 free_web.append(obj)
 
-        context['offer_web'] = offer_web
+        context['offer_web'] = offer_webmaster
         context['webmasters'] = free_web
 
         return context
@@ -316,9 +316,11 @@ class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        webmaster = get_object_or_404(Webmaster, user=self.request.user)
-        offer_webmaster = get_object_or_404(OfferWebmaster, offer=self.object, webmaster=webmaster)
-
+        try:
+            webmaster = get_object_or_404(Webmaster, user=self.request.user)
+            offer_webmaster = get_object_or_404(OfferWebmaster, offer=self.object, webmaster=webmaster)
+        except Http404:
+            redirect('offer_detail', pk=self.object.pk)
         # Инициализируем форму для метрики только для вебмастера
         metrika_form = OfferWebmasterForm(instance=offer_webmaster, initial={'is_webmaster': True})
 
@@ -328,18 +330,24 @@ class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        webmaster = get_object_or_404(Webmaster, user=self.request.user)
-        offer_webmaster = get_object_or_404(OfferWebmaster, offer=self.object, webmaster=webmaster)
+        try:
+            webmaster = get_object_or_404(Webmaster, user=self.request.user)
 
-        # Проверяем, если это вебмастер, обрабатываем форму
-        metrika_form = OfferWebmasterForm(request.POST, instance=offer_webmaster, initial={'is_webmaster': True})
-        if metrika_form.is_valid():
-            metrika_form.save()
-            messages.success(request, 'Ключ Яндекс Метрики успешно обновлен.')
-        else:
-            messages.error(request, 'Ошибка при обновлении ключа Яндекс Метрики.')
+            offer_webmaster = get_object_or_404(OfferWebmaster, offer=self.object, webmaster=webmaster)
+        except Http404:
+            print('ad')
+            redirect('offer_detail', pk=self.object.pk)
+        finally:
 
-        return redirect('webmaster_offer_detail', pk=self.object.pk)
+            # Проверяем, если это вебмастер, обрабатываем форму
+            metrika_form = OfferWebmasterForm(request.POST, instance=offer_webmaster, initial={'is_webmaster': True})
+            if metrika_form.is_valid():
+                metrika_form.save()
+                messages.success(request, 'Ключ Яндекс Метрики успешно обновлен.')
+            else:
+                messages.error(request, 'Ошибка при обновлении ключа Яндекс Метрики.')
+
+            return redirect('webmaster_offer_detail', pk=self.object.pk)
 
 
 class WebmasterLeadsView(LoginRequiredMixin, ListView):
@@ -601,7 +609,7 @@ class AdvertiserLeadsView(LoginRequiredMixin, ListView):
                         lead.offer_webmaster.webmaster.balance += lead.offer_webmaster.offer.lead_price
                         lead.offer_webmaster.webmaster.save()
 
-                    if new_processing_status in ['rejected']:
+                    if new_processing_status in ['rejected', 'trash', 'duplicate']:
                         lead.status = 'cancelled'
 
                     lead.save()
@@ -638,7 +646,7 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
     model = LeadWall
     template_name = 'leads/admin_leads.html'
     context_object_name = 'leads'
-    paginate_by = 25
+    paginate_by = 10
 
     def get_queryset(self):
         advertiser = get_object_or_404(Advertiser, user=self.request.user)
@@ -727,13 +735,16 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
                         lead.status = 'paid'
                         lead.offer_webmaster.offer.partner_card.deposit -= lead.offer_webmaster.offer.offer_price
                         lead.offer_webmaster.offer.partner_card.save()
+                    else:
+                        lead.status = 'on_hold'
 
                     if new_processing_status in offer.validation_data_web:
                         lead.offer_webmaster.webmaster.balance += lead.offer_webmaster.offer.lead_price
                         lead.offer_webmaster.webmaster.save()
 
-                    if new_processing_status in ['rejected']:
+                    if new_processing_status in ['rejected', 'trash', 'duplicate']:
                         lead.status = 'cancelled'
+
 
                     lead.save()
                     return JsonResponse({'success': True})
@@ -1091,7 +1102,7 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
 
             offer_stats = (
                 leads
-                .annotate(month=TruncMonth('update_at__date'))
+                .annotate(month=TruncMonth('create_at__date'))
                 .values('month')  # Группируем по месяцам
                 .annotate(
                     unique_leads=Count('id', distinct=True),
@@ -1278,6 +1289,7 @@ class AdminOfferStatisticsView(LoginRequiredMixin, View):
             'partner_cards': partner_crd,
             'webmasters': webmasters,
             'select_webmasters': self.request.GET.getlist('webmasters[]'),
+            'offers': Offer.objects.all()
         }
 
         return render(request, self.template_name, context)

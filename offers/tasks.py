@@ -1,6 +1,9 @@
 from celery import shared_task
-from .models import OfferArchive, LeadWall
 from django.utils.timezone import now
+from celery.utils.log import get_task_logger
+from django.apps import apps
+
+from .models import LeadWall, OfferArchive
 
 @shared_task
 def check_for_repository_updates():
@@ -10,14 +13,12 @@ def check_for_repository_updates():
             archive.update_repository()
             archive.save()
 
-
 @shared_task
 def update_record(pk):
     try:
         obj = LeadWall.objects.get(pk=pk)
+        if obj.created_at == obj.updated_at:
 
-        # Проверяем, прошло ли 24 часа с момента последнего обновления
-        if now() - obj.update_at >= timedelta(minutes=1):
             obj.processing_status = 'expired'
             obj.status = 'paid'
             obj.save()

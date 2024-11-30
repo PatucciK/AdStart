@@ -22,6 +22,7 @@
                     {% endif%}
 
                     <th>Статус оффера</th>
+                    <th>Валидность</th>
                     <th>Актуальность</th>
                     <th>Действия</th>
                 </tr>
@@ -36,9 +37,10 @@
 
                     {% if user.is_superuser %}
                     <td>{{ offer.lead_price }} руб.</td>
-                    {% endif%}
+                    {% endif %}
                     <td>{{ offer.offer_price }} руб.</td>
                     <td>{{ offer.get_public_status_display }}</td>
+                    <td>{{ offer.validation_data_lead }}</td>
                     <td>{{ offer.get_status_display }}</td>
                     <td>
                         <div class="btn-group" role="group">

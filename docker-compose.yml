@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Сервис для Redis
+  redis:
+    image: "redis:alpine"
+    container_name: "redis"
+    ports:
+      - "6379:6379"  # Порт Redis
+
+  # Сервис для Celery
+  celery:
+    build: .
+    container_name: "celery"
+    command: celery -A your_project_name worker --loglevel=info  # Замените на имя вашего проекта
+    depends_on:
+      - redis
+    volumes:
+      - .:/app  # Монтируем текущую папку
+
+  # Сервис для Django
+  django:
+    build: .
+    container_name: "django"
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"  # Порт Django
+    depends_on:
+      - redis

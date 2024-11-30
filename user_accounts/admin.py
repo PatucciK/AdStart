@@ -1,6 +1,6 @@
 # user_accounts/admin.py
 from django.contrib import admin
-from .models import Advertiser, Webmaster
+from .models import Advertiser, Webmaster, Category
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.contrib.auth.models import User
 
@@ -12,6 +12,10 @@ class AdvertiserAdmin(admin.ModelAdmin):
         return obj.user.email
 
     user_email.short_description = 'Email'
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at', 'updated_at')
+    search_fields = ('name',)
 
 
 class WebmasterAdmin(admin.ModelAdmin):
@@ -39,6 +43,7 @@ class CustomUserAdmin(DefaultUserAdmin):
 
 
 admin.site.register(Advertiser, AdvertiserAdmin)
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Webmaster, WebmasterAdmin)
 
 # Перерегистрируем модель User с новым админ-классом
