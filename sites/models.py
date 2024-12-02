@@ -4,10 +4,8 @@ import shutil
 from django.db import models
 from django.utils.text import slugify
 from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
-from offers.models import Offer, OfferWebmaster
+from offers.models import Offer
 
 
 class Category(models.Model):
@@ -29,7 +27,7 @@ class Category(models.Model):
 
 class SiteArchive(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название архива/сайта")
-    offer_web = models.ForeignKey(OfferWebmaster, on_delete=models.CASCADE, related_name='site_offer', null=True)
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='site_offer', null=True)
 
     category = models.ForeignKey(
         'Category',
@@ -60,28 +58,7 @@ class SiteArchive(models.Model):
                 os.remove(self.archive.path)
 
         super().delete(*args, **kwargs)
-        return self.name
 
     class Meta:
         verbose_name = 'Сайт'
         verbose_name_plural = 'Сайты'
-
-
-@receiver(post_save, sender=SiteArchive)
-def extract_archive(sender, instance, created, **kwargs):
-    """ Распаковка архива после сохранения """
-    if created and instance.archive:
-        archive_path = instance.archive.path
-        target_dir = os.path.join(
-            settings.MEDIA_ROOT, 'extracted', f"{instance.category.slug}", f"{instance.slug}"
-        )
-        os.makedirs(target_dir, exist_ok=True)
-
-        # Распаковка архива
-        if os.path.exists(archive_path):
-            with zipfile.ZipFile(archive_path, 'r') as zip_ref:
-                zip_ref.extractall(target_dir)
-
-        # Обновление пути распакованных файлов
-        instance.extracted_path = target_dir.replace(str(settings.MEDIA_ROOT), '').lstrip('/\\')
-        instance.save(update_fields=['extracted_path'])

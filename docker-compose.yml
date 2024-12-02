@@ -12,11 +12,14 @@ services:
   celery:
     build: .
     container_name: "celery"
-    command: celery -A your_project_name worker --loglevel=info  # Замените на имя вашего проекта
+    command: celery -A AdStart worker --loglevel=info  # Замените на имя вашего проекта
     depends_on:
       - redis
     volumes:
       - .:/app  # Монтируем текущую папку
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
 
   # Сервис для Django
   django:
@@ -29,3 +32,6 @@ services:
       - "8000:8000"  # Порт Django
     depends_on:
       - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0

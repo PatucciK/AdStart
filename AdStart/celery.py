@@ -8,10 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AdStart.settings')
 
 app = Celery('AdStart')
 
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Убедитесь, что задачи автоматически находятся
-
 app.autodiscover_tasks(['offers'])
 
 

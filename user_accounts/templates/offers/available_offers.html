@@ -88,13 +88,7 @@
                 </tr>
 
                 {% for offer in offers %}
-<!--                offer_detail-->
-                {% is_mine offer.id as some_name %}
-                    {% if some_name %}
-                        <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}" style="cursor: pointer">
-                    {% else %}
-                        <tr class="clickable-row" data-href="{% url 'offer_detail' offer.id %}" style="cursor: pointer">
-                    {% endif %}
+                    <tr class="clickable-row" data-href="{% url 'offer_detail' offer.id %}" style="cursor: pointer">
                     <td class="text-center">{{ offer.id }}</td>
                     <td class="text-center">
                         {% if offer.logo %}

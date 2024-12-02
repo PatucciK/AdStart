@@ -46,7 +46,12 @@ def get_geolocation(ip):
 def is_mine(context, offer_id):
     # Пример простой функции, которая принимает значение и возвращает результат
     offer = get_object_or_404(Offer, id=int(offer_id))
-    webmaster = get_object_or_404(Webmaster, user=context['request'].user)
+
+    try:
+        webmaster = Webmaster.objects.get(user=context['request'].user)
+    except Webmaster.DoesNotExist:
+        return False
+
     # Проверка, что связь еще не создана
     if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
         return False

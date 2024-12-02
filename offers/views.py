@@ -20,6 +20,7 @@ from django.views.generic import ListView, CreateView, DetailView, DeleteView, V
 from django.contrib import messages
 from django.db.models.functions import TruncMonth, Coalesce
 from .models import Offer, LeadWall, OfferWebmaster, Click, LeadComment, OfferArchive
+from sites.models import Category, SiteArchive
 from partner_cards.models import PartnerCard
 from .forms import OfferForm, OfferWebmasterForm
 from user_accounts.models import Advertiser, Webmaster
@@ -94,25 +95,53 @@ class CreateOfferView(LoginRequiredMixin, CreateView):
 
 class OfferDetailView(LoginRequiredMixin, DetailView):
     model = Offer
-    template_name = 'offers/offer_detail.html'
+    context_object_name = 'offer'
+
+    def get_template_names(self):
+        try:
+            webmaster = Webmaster.objects.get(user=self.request.user)
+            offer_webmaster = OfferWebmaster.objects.get(offer_id=self.kwargs['pk'], webmaster=webmaster)
+        except Webmaster.DoesNotExist:
+            return ['offers/offer_detail.html']
+        except OfferWebmaster.DoesNotExist:
+            return ['offers/offer_detail.html']
+        
+        return ['offers/webmaster_offer_detail.html']
+
 
     def get_queryset(self):
+        print(self.kwargs['pk'])
         offer = Offer.objects.filter(id=self.kwargs['pk'])
         return offer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        offer_webmaster = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'])
-        web_ids = [i['webmaster_id'] for i in offer_webmaster.values('webmaster_id')]
-        web = Webmaster.objects.all()
-        free_web = []
+        try:
+            webmaster = Webmaster.objects.get(user=self.request.user)
+            offer_webmaster = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'], webmaster=webmaster).first()
+            if offer_webmaster:
+                metrika_form = OfferWebmasterForm(instance=offer_webmaster, initial={'is_webmaster': True})
+                context['metrika_form'] = metrika_form 
+                context['offer_webmaster'] = offer_webmaster
+        except Webmaster.DoesNotExist:
+            offer_webmaster = OfferWebmaster.objects.filter(offer_id=self.kwargs['pk'])
+            web_ids = [i['webmaster_id'] for i in offer_webmaster.values('webmaster_id')]
+            web = Webmaster.objects.all()
 
-        for obj in web:
-            if obj.id not in web_ids:
-                free_web.append(obj)
+            free_web = []
+
+            for obj in web:
+                if obj.id not in web_ids:
+                    free_web.append(obj)
+
+            context['webmasters'] = free_web
 
         context['offer_web'] = offer_webmaster
-        context['webmasters'] = free_web
+        category_site = Category.objects.all()
+        context['category_site'] = category_site        
+
+        context['sites'] = SiteArchive.objects.filter(offer_id=self.kwargs['pk'])       
+        print()
 
         return context
 
@@ -120,20 +149,41 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
         action = request.POST.get('action')
 
-        webmaster_id = request.POST.get('webmaster')
-        payout_input = request.POST.get('payoutInput')
         offer = get_object_or_404(Offer, pk=kwargs['pk'])
-        webmaster = Webmaster.objects.get(id=webmaster_id)
-        print(payout_input)
+
+
         if action == 'add_offerweb':
+            webmaster_id = request.POST.get('webmaster')
+            payout_input = request.POST.get('payoutInput')
+            webmaster = Webmaster.objects.get(id=webmaster_id)
+
             if int(payout_input) < offer.offer_price:
                 if not OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
                     OfferWebmaster.objects.create(offer=offer, webmaster=webmaster,
                                                   validation_data_lead=offer.validation_data_web, rate_of_pay=payout_input)
 
         elif action == 'remove_offerweb':
+            webmaster_id = request.POST.get('webmaster')
+            payout_input = request.POST.get('payoutInput')
+            webmaster = Webmaster.objects.get(id=webmaster_id)
             if OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).exists():
                 OfferWebmaster.objects.filter(offer=offer, webmaster=webmaster).delete()
+            
+        elif action == 'add_site':
+            site_name = request.POST.get('site_name')
+            site_slug = request.POST.get('site_slug')
+            site_category = Category.objects.get(slug=request.POST.get('category'))
+            site_archive = request.FILES.get('uploaded_file')
+
+            print(site_category, site_archive)
+            if not SiteArchive.objects.filter(slug=site_slug, name=site_name).exists():
+                SiteArchive.objects.create(offer=offer, name=site_name, slug=site_slug, category=site_category, archive=site_archive)
+        
+        elif action == 'delete_site':
+
+            site = request.POST.get('site')
+            if SiteArchive.objects.filter(id=site).exists():
+                SiteArchive.objects.filter(id=site).delete()
 
         return redirect('offer_detail', pk=offer.pk)
 
@@ -335,7 +385,6 @@ class WebmasterOfferDetailView(LoginRequiredMixin, DetailView):
 
             offer_webmaster = get_object_or_404(OfferWebmaster, offer=self.object, webmaster=webmaster)
         except Http404:
-            print('ad')
             redirect('offer_detail', pk=self.object.pk)
         finally:
 

@@ -16,17 +16,7 @@ def upload_archive(request):
         form = SiteArchiveForm(request.POST, request.FILES)
         if form.is_valid():
             site_archive = form.save()
-
-            archive_path = site_archive.archive.path
-            extract_to = os.path.join(settings.MEDIA_ROOT, 'extracted', str(site_archive.id))
-            os.makedirs(extract_to, exist_ok=True)
-
-            with zipfile.ZipFile(archive_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_to)
-
-            site_archive.extracted_path = extract_to
             site_archive.save()
-            return redirect('view_site', site_id=site_archive.id)
     else:
         form = SiteArchiveForm()
 
@@ -51,7 +41,7 @@ def view_site(request, category_slug, site_slug, path='index.html'):
         raise Http404("Сайт не найден")
 
 
-def download_archive(request, category_slug, site_slug):
+def download_archive(request, unique_token, category_slug, site_slug):
     site = get_object_or_404(SiteArchive, slug=site_slug)
 
     # Создаем временную директорию для модифицированного архива
@@ -76,7 +66,7 @@ def download_archive(request, category_slug, site_slug):
                         # Вставка изменения в index.html
                         modified_content = content.replace(
                             '{{ unique_token }}',
-                            f'{site.offer_web.unique_token}'
+                            f'{unique_token}'
                         )
 
                         # Сохранение измененного index.html во временный файл
