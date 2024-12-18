@@ -15,7 +15,7 @@ class AdvertiserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertiser
-        fields = ['user', 'telegram', 'phone']
+        fields = ['user', 'category', 'telegram', 'phone']
 
     def create(self, validated_data):
         # Извлекаем данные для пользователя

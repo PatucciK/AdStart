@@ -100,7 +100,7 @@
                     <td>{{ lead.domain|default_if_none:"" }}</td>
                     <td>{{ lead.id }}</td>
                     <td>{{ lead.name|default_if_none:"" }}</td>
-                    <td>{{ lead.phone|default_if_none:"" }}</td>
+                    <td class='phone'>{{ lead.phone|default_if_none:"" }}</td>
                     <td>{{ lead.ip_adress|default_if_none:"" }} {% if lead.ip_adress %}( {{ lead.ip_adress|get_geolocation }} ){% endif %}</td>
                     <td>{{ lead.description|default_if_none:""|truncatewords:50 }}</td>
                     <td>{{ lead.description_extra|default_if_none:""|truncatewords:50 }}</td>
@@ -194,6 +194,22 @@
                     }
                 });
             });
+        });
+    </script>
+      <script>
+        // скрытие номера
+        // Функция для маскировки телефона
+        function maskPhoneNumber(phoneNumber) {
+            return phoneNumber.replace(/(\+\d{1,3})(\d{3})(\d{4})(\d{3})/, '$1$2****$4');
+        }
+
+        // Находим все элементы с классом "phone"
+        const phoneElements = document.querySelectorAll('.phone');
+
+        // Применяем маскировку к каждому элементу
+        phoneElements.forEach(phoneElement => {
+            const originalPhone = phoneElement.textContent.trim(); // Получаем текст номера
+            phoneElement.textContent = maskPhoneNumber(originalPhone); // Заменяем текст на маскированный
         });
     </script>
     <script>

@@ -18,13 +18,11 @@ def check_for_repository_updates():
 def update_record(pk):
     try:
         obj = LeadWall.objects.get(id=pk)
-        if localtime(obj.created_at).strftime('%Y-%m-%d %H:%M:%S') == localtime(obj.update_at).strftime('%Y-%m-%d %H:%M:%S'):
+        if localtime(obj.created_at).strftime('%Y-%m-%d %H:%M:%S') == localtime(obj.update_at).strftime('%Y-%m-%d %H:%M:%S') and obj.processing_status == 'new':
             obj.processing_status = 'expired'
             obj.status = 'paid'
             obj.save()
-
             return f'Запись {pk} обновлена'
-
         else:
             return f'Запись {pk} не обновлена, так как прошло менее 24 часов с последнего изменения'
 

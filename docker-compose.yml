@@ -10,8 +10,11 @@ services:
 
   # Сервис для Celery
   celery:
-    build: .
+
     container_name: "celery"
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: celery -A AdStart worker --loglevel=info  # Замените на имя вашего проекта
     depends_on:
       - redis
@@ -24,8 +27,9 @@ services:
   # Сервис для Django
   django:
     build: .
+    image: django:latest
     container_name: "django"
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn AdStart.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/app
     ports:

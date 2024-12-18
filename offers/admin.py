@@ -15,10 +15,19 @@ class OfferAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         # Получаем список полей
         fields = super().get_fields(request, obj)
+        
         # Если пользователь не является суперпользователем, удаляем нужные поля
         if not request.user.is_superuser:
             fields = [field for field in fields if field not in self.superuser_only_fields]
         return fields
+
+
+    def get_list_display(self, request):
+            """Переопределяем список отображаемых полей."""
+            if request.user.is_superuser:
+                return self.list_display  # Показываем все поля суперпользователю
+            return ('name', 'status', 'public_status', 'partner_card', 'lead_price')  # Без 'restricted_field'
+
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -55,9 +64,13 @@ class OfferAdmin(admin.ModelAdmin):
                             current_value=old_value,
                             requested_value=obj.lead_price
                         )
-
-
-            super().save_model(request, obj, form, change)
+                        return
+        
+            if LeadWall.objects.filter(phone=self.phone).exists():
+                obj.processing_status = 'duplicate'
+                obj.status = 'cancelled'
+    
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ChangeRequest)

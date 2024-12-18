@@ -174,8 +174,6 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
             site_slug = request.POST.get('site_slug')
             site_category = Category.objects.get(slug=request.POST.get('category'))
             site_archive = request.FILES.get('uploaded_file')
-
-            print(site_category, site_archive)
             if not SiteArchive.objects.filter(slug=site_slug, name=site_name).exists():
                 SiteArchive.objects.create(offer=offer, name=site_name, slug=site_slug, category=site_category, archive=site_archive)
         
@@ -430,10 +428,10 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(offer_webmaster__offer__id=offer_id)
 
         if domain_name:
-            queryset = queryset.filter(domain=domain_name)
+            queryset = queryset.filter(domain__icontains=domain_name)
 
         if name:
-            queryset = queryset.filter(name=name)
+            queryset = queryset.filter(name__icontains=name)
 
         if status:
             queryset = queryset.filter(status=status)
@@ -460,7 +458,7 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(query)
 
         if phone_number:
-            queryset = queryset.filter(phone=phone_number)
+            queryset = queryset.filter(phone__icontains=phone_number)
 
         return queryset
 
@@ -725,7 +723,7 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(domain=domain_name)
 
         if name:
-            queryset = queryset.filter(name=name)
+            queryset = queryset.filter(name__icontains=name)
 
         if status:
             queryset = queryset.filter(status=status)
@@ -752,7 +750,7 @@ class AdminLeadsView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(query)
 
         if phone_number:
-            queryset = queryset.filter(phone=phone_number)
+            queryset = queryset.filter(phone__icontains=phone_number)
 
         return queryset
 
@@ -1474,3 +1472,39 @@ def download_offer_archive(request, pk):
             raise Http404("Архив не найден.")
     except OfferArchive.DoesNotExist:
         raise Http404("Архив для данного оффера не найден.")
+
+
+@csrf_exempt  # Отключаем проверку CSRF, так как запросы идут от внешнего сервиса
+def firstlead_postback(request):
+    if request.method == 'POST':
+        try:
+            # Парсим данные из запроса
+            data = json.loads(request.body)
+
+            # Получаем необходимые параметры
+            click_id = data.get('click_id')
+            conversion_id = data.get('conversion_id')
+            revenue = data.get('revenue')
+            status = data.get('status')
+
+            # Логика обработки данных
+            if status == 'success':
+                # Например, сохраняем данные в базу
+                # (замените "PostbackModel" на вашу модель)
+                from .models import PostbackModel
+                PostbackModel.objects.create(
+                    click_id=click_id,
+                    conversion_id=conversion_id,
+                    revenue=revenue,
+                    status=status,
+                )
+
+            # Возвращаем успешный ответ
+            return JsonResponse({'message': 'Postback received successfully'}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

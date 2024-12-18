@@ -65,6 +65,8 @@ class Offer(models.Model):
     def save(self, *args, **kwargs):
         if self.contract_number == 'AUTO_GENERATE':
             self.contract_number = self.generate_contract_number()
+        
+            print(self.contract_number)
         super().save(*args, **kwargs)
 
     def generate_contract_number(self):
@@ -81,7 +83,7 @@ class OfferArchive(models.Model):
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='archives')
     repo_url = models.URLField(max_length=255, verbose_name='URL репозитория')
     branch = models.CharField(max_length=255, verbose_name='Ветка репозитория', default='main')
-    cloned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата клонирования')
+    cloned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата клонирования', null=True)
     last_update = models.DateTimeField(auto_now=True, verbose_name='Последнее обновление')
     local_repo_path = models.CharField(max_length=255, blank=True, null=True, verbose_name='Путь к локальному репозиторию')
     last_commit_hash = models.CharField(max_length=40, blank=True, null=True, verbose_name='Хеш последнего коммита')
@@ -230,6 +232,14 @@ class LeadWall(models.Model):
         if new_status in unchangeable_statuses and not self.offer_webmaster.offer.partner_card.advertiser.user.is_superuser:
             return False
         return True
+
+    def save(self, *args, **kwargs):
+        if LeadWall.objects.filter(phone=self.phone).exists():
+            self.processing_status = 'duplicate'
+            self.status = 'cancelled'
+
+        super().save(*args, **kwargs)
+
 
     class Meta:
         verbose_name = 'Лидвол'

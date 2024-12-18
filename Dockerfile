@@ -31,11 +31,7 @@ ENV LC_ALL=ru_RU.UTF-8
 ENV LANG=ru_RU.UTF-8
 
 # Запускаем команду для создания миграций (например, collectstatic, если нужно)
-
 RUN python manage.py migrate
 
 # Открываем порт для приложения
 EXPOSE 8000
-
-# Запускаем Django сервер на 0.0.0.0, чтобы было доступно снаружи
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

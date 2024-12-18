@@ -83,7 +83,7 @@
 
                 </tr>
                 {% for offer in offers %}
-                <tr class="clickable-row" data-href="{% url 'webmaster_offer_detail' offer.id %}" style="cursor: pointer">
+                <tr class="clickable-row" data-href="{% url 'offer_detail' offer.id %}" style="cursor: pointer">
                     <td class="text-center">{{ offer.id }}</td>
                     <td class="text-center">
                         {% if offer.logo %}

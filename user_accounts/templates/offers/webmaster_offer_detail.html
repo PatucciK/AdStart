@@ -84,7 +84,7 @@
 
                 <!-- Документация по внедрению пост-запроса -->
                 <p><strong>Документация по внедрению пост-запроса:</strong>
-                    <a href="http://127.0.0.1:8000/api/docs/#tag/Leads/operation/leads_create">Ссылка на документацию</a>
+                    <a href="/api/docs/#tag/Leads/operation/leads_create">Ссылка на документацию</a>
                 </p>
 
                 <!-- Ключ Яндекс Метрики -->
@@ -111,10 +111,10 @@
                             <tr>
                                 <td>{{ el.name }}</td>
                                 <td>
-                                    <a href="{% url 'view_file' el.category.slug el.slug 'index.html' %}" id="downloadLink" target="_blank" download>Просмотр</a>
+                                    <a href="{% url 'view_file' el.category.slug el.slug 'index.html' %}" >Просмотр</a>
                                 </td>
                                 <td>
-                                    <a href="{% url 'download_archive' offer_webmaster.unique_token el.category.slug el.slug %}">Скачать</a>
+                                    <a href="{% url 'download_archive' offer_webmaster.unique_token el.category.slug el.slug %}" id="downloadLink" target="_blank" download>Скачать</a>
                                 </td>
                             </tr>
                             {% endfor %}

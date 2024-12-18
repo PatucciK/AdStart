@@ -32,8 +32,12 @@ LANGUAGES = (
     ('en', 'English'),
 )
 
-ALLOWED_HOSTS = ["212.67.14.251", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["212.67.14.251", "localhost", "127.0.0.1", "ad-start.ru"]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://ad-start.ru',
+    'https://www.ad-start.ru',  # Если используете с www
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -133,23 +137,23 @@ WSGI_APPLICATION = 'AdStart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'AdStart',  # Имя базы данных
-#         'USER': 'postgres',      # Имя пользователя
-#         'PASSWORD': 'root',  # Пароль
-#         'HOST': 'localhost',    # Локальный сервер
-#         'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ad_start',  # Имя базы данных
+        'USER': 'ad_start_admin',      # Имя пользователя
+        'PASSWORD': '35IsS_8Ro4pMSUctH',  # Пароль
+        'HOST': '212.67.14.251',    # Локальный сервер
+        'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
+    }
+}
 
 
 
@@ -200,7 +204,7 @@ USE_I18N = True
 
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Дополнительные директории для поиска статических файлов
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
