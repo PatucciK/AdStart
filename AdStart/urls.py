@@ -12,6 +12,7 @@ from partner_cards.apiview import CreatePartnerCardAPIView
 from user_accounts.apiview import CreateAdvertiserAPIView, CreateWebmasterAPIView, RequestConfirmationCodeAPIView, \
     ConfirmEmailAndRegisterAPIView, UpdateAdvertiserAPIView, UpdateWebmasterAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from ats.apiview import CallBeginAPIView
 
 # Schema for swagger and redoc
 schema_view = get_schema_view(
@@ -75,6 +76,9 @@ urlpatterns = [
     # JWT Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # ATS API
+    path('api/ats/notify_on_call/', CallBeginAPIView.as_view(), name='notify_on_call'),
 ]
 
 # Add media URL serving in development
