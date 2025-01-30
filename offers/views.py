@@ -26,7 +26,7 @@ from .forms import OfferForm, OfferWebmasterForm
 from user_accounts.models import Advertiser, Webmaster
 from datetime import date, datetime
 from django.db import models, transaction
-from django.db.models import F
+from django.db.models import F, Q
 
 from django.core.paginator import Paginator
 
@@ -420,6 +420,7 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
         geo = self.request.GET.get("geo")
         phone_number = self.request.GET.get("phone_number")
 
+        queryset = LeadWall.objects.filter(Q(offer_webmaster__webmaster=webmaster) | Q(webmaster=webmaster)).order_by('-id')
 
         if el_id:
             queryset = queryset.filter(id=el_id)
@@ -459,7 +460,6 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
 
         if phone_number:
             queryset = queryset.filter(phone__icontains=phone_number)
-
         return queryset
 
     def get_context_data(self, **kwargs):

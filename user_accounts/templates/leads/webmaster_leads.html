@@ -122,9 +122,11 @@
                     <td>{{ lead.get_status_display }}</td>
                     <td>{{ lead.get_processing_status_display }}</td>
                     <td>
+                        {% if lead.offer_webmaster %}
                         <a href="{% url 'webmaster_offer_detail' lead.offer_webmaster.offer.id %}">
                             {{ lead.offer_webmaster.offer.name|default_if_none:"" }}
                         </a>
+                        {% endif %}
                     </td>
                     <td>{{ lead.sub_1|default_if_none:"" }}</td>
                     <td>{{ lead.sub_2|default_if_none:"" }}</td>

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CallBeginSerializer
 from rest_framework import serializers
-from offers.models import LeadWall, OfferWebmaster
+from offers.models import LeadWall, OfferWebmaster, Webmaster
 
 class CallBeginAPIView(APIView):
 
@@ -13,23 +13,22 @@ class CallBeginAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            offer_webmaster = OfferWebmaster.objects.get(phone=serializer.validated_data['manager_number'])
-
+            offer_webmaster = Webmaster.objects.get(phone=serializer.validated_data['manager_number'])
+            
             processing_status = 'new'
             lead_status = 'on_hold'
         
             # Проверка на уникальность номера для оффера
-            if LeadWall.objects.filter(phone=serializer.validated_data['client_number'], offer_webmaster=offer_webmaster).exists():
+            # if LeadWall.objects.filter(phone=serializer.validated_data['client_number'], offer_webmaster=offer_webmaster).exists():
 
-                processing_status = 'duplicate'
-                lead_status = 'cancelled'
+            #     processing_status = 'duplicate'
+            #     lead_status = 'cancelled'
 
             description = serializer.validated_data.get('description', '')
             description_extra = ", ".join(filter(None, [serializer.validated_data.get(f'q{i}') for i in range(1, 6)]))
-
             LeadWall.objects.create(
-                offer_webmaster=offer_webmaster, # через таблицу
-                # name=validated_data['name'],
+                webmaster=offer_webmaster, # через таблицу
+                name=serializer.validated_data['client_number'],
                 phone=serializer.validated_data['client_number'],
                 description=f"[Создан через Звонки] {description}" if description else "[Создан через Звонки]",
                 description_extra=description_extra,

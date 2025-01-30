@@ -7,7 +7,7 @@ from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
 from offers.apiview import LeadWallAPIView, LeadListView, LeadUpdateView, OfferListView, OfferCreateView, \
-    OfferUpdateView, ClickAPIView, OfferDeleteView
+    OfferUpdateView, ClickAPIView, OfferDeleteView, OfferCreatePostbackAPIView
 from partner_cards.apiview import CreatePartnerCardAPIView
 from user_accounts.apiview import CreateAdvertiserAPIView, CreateWebmasterAPIView, RequestConfirmationCodeAPIView, \
     ConfirmEmailAndRegisterAPIView, UpdateAdvertiserAPIView, UpdateWebmasterAPIView
@@ -58,6 +58,7 @@ urlpatterns = [
     path('api/offers/create/', OfferCreateView.as_view(), name='offer-create'),
     path('api/offers/<int:offer_id>/update/', OfferUpdateView.as_view(), name='offer-update'),
     path('api/offers/<int:offer_id>/delete/', OfferDeleteView.as_view(), name='offer-delete'),
+    path('api/offers/postback', OfferCreatePostbackAPIView.as_view(), name='offer-postback-create'),
 
     # User creation APIs (Advertiser and Webmaster)
     path('api/create-advertiser/', CreateAdvertiserAPIView.as_view(), name='create-advertiser'),
@@ -79,6 +80,9 @@ urlpatterns = [
 
     # ATS API
     path('api/ats/notify_on_call/', CallBeginAPIView.as_view(), name='notify_on_call'),
+
+    # Postbacks API
+    path('api/postbacks/', include('postbacks.urls')),
 ]
 
 # Add media URL serving in development

@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'offers',
     'finance',
     'sites',
-    'ats'
+    'ats',
+    'postbacks',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'

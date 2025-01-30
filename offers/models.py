@@ -201,8 +201,9 @@ class LeadWall(models.Model):
     ]
 
     offer_webmaster = models.ForeignKey(OfferWebmaster, on_delete=models.CASCADE, related_name='leads',
-                                        verbose_name='Оффер-Вебмастер')
+                                        verbose_name='Оффер-Вебмастер', null=True)
     name = models.CharField(max_length=255, verbose_name='Имя пользователя', blank=True, null=True)
+    webmaster = models.ForeignKey(Webmaster, on_delete=models.PROTECT, verbose_name="Вебмастер", null=True)
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
     description_extra = models.TextField(blank=True, null=True, verbose_name='Дополнительно')
     processing_status = models.CharField(max_length=20, choices=PROCESSING_STATUS_CHOICES, default='new', verbose_name='Статус обработки')
@@ -234,11 +235,12 @@ class LeadWall(models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        if LeadWall.objects.filter(phone=self.phone).exists():
+        if LeadWall.objects.filter(phone=self.phone).count()>1 and self.webmaster:
             self.processing_status = 'duplicate'
             self.status = 'cancelled'
-
-        
+        elif LeadWall.objects.filter(phone=self.phone).exists() and self.webmaster == None:
+            self.processing_status = 'duplicate'
+            self.status = 'cancelled'
         super().save(*args, **kwargs)
 
 

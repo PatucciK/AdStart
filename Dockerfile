@@ -36,4 +36,5 @@ ENV LANG=ru_RU.UTF-8
 # Открываем порт для приложения
 EXPOSE 8000
 
-ENTRYPOINT ["python", "manage.py", "runserver"]
+# ENTRYPOINT ["python", "manage.py", "runserver"]
+ENTRYPOINT ["/app/run.sh"]

@@ -101,7 +101,9 @@ class LeadWallAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'offer_webmaster__offer__name')
 
     def get_offer_name(self, obj):
-        return obj.offer_webmaster.offer.name
+        if obj.offer_webmaster:
+            return obj.offer_webmaster.offer.name
+        return obj.webmaster.user.username
     get_offer_name.short_description = 'Оффер'
 
     def get_readonly_fields(self, request, obj=None):
