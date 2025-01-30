@@ -90,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -138,31 +139,31 @@ WSGI_APPLICATION = 'AdStart.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
-#     # 'default': {
-#     #     'ENGINE': 'django.db.backends.postgresql',
-#     #     'NAME': 'ad_start',  # Имя базы данных
-#     #     'USER': 'ad_start_admin',      # Имя пользователя
-#     #     'PASSWORD': '35IsS_8Ro4pMSUctH',  # Пароль
-#     #     'HOST': '212.67.14.251',    # Локальный сервер
-#     #     'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
-#     # }
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get("DATABASE_DBNAME"),  # Имя базы данных
-#         'USER': os.environ.get("DATABASE_USER"),      # Имя пользователя
-#         'PASSWORD': os.environ.get("DATABASE_PASSWORD"),  # Пароль
-#         'HOST': os.environ.get("DATABASE_URL"),    # Локальный сервер
-#         'PORT': os.environ.get("DATABASE_PORT"),         # Порт PostgreSQL
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'ad_start',  # Имя базы данных
+    #     'USER': 'ad_start_admin',      # Имя пользователя
+    #     'PASSWORD': '35IsS_8Ro4pMSUctH',  # Пароль
+    #     'HOST': '212.67.14.251',    # Локальный сервер
+    #     'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
+    # }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("DATABASE_DBNAME"),  # Имя базы данных
+        'USER': os.environ.get("DATABASE_USER"),      # Имя пользователя
+        'PASSWORD': os.environ.get("DATABASE_PASSWORD"),  # Пароль
+        'HOST': os.environ.get("DATABASE_URL"),    # Локальный сервер
+        'PORT': os.environ.get("DATABASE_PORT"),         # Порт PostgreSQL
+    }
+}
 
 
 
@@ -187,8 +188,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+# CELERY_BROKER_URL = 'redis://redis:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # Настройки сериализации задач
 CELERY_ACCEPT_CONTENT = ['json']

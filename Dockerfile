@@ -31,7 +31,9 @@ ENV LC_ALL=ru_RU.UTF-8
 ENV LANG=ru_RU.UTF-8
 
 # Запускаем команду для создания миграций (например, collectstatic, если нужно)
-RUN python manage.py migrate
+# RUN python manage.py migrate
 
 # Открываем порт для приложения
 EXPOSE 8000
+
+ENTRYPOINT ["python", "manage.py", "runserver"]

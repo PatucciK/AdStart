@@ -24,8 +24,7 @@ class Advertiser(models.Model):
         on_delete=models.CASCADE,
         null=True,
         verbose_name='Категория',
-        help_text='Категория рекламодателя'
-
+        help_text='Категория рекламодателя',
     )
     telegram = models.CharField(
         max_length=50,
