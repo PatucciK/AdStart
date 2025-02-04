@@ -420,7 +420,7 @@ class WebmasterLeadsView(LoginRequiredMixin, ListView):
         geo = self.request.GET.get("geo")
         phone_number = self.request.GET.get("phone_number")
 
-        queryset = LeadWall.objects.filter(Q(offer_webmaster__webmaster=webmaster) | Q(webmaster=webmaster)).order_by('-id')
+        queryset = LeadWall.objects.filter(offer_webmaster__webmaster=webmaster).order_by('-id')
 
         if el_id:
             queryset = queryset.filter(id=el_id)

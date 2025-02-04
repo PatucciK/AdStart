@@ -18,12 +18,6 @@ class CallBeginAPIView(APIView):
             processing_status = 'new'
             lead_status = 'on_hold'
         
-            # Проверка на уникальность номера для оффера
-            if LeadWall.objects.filter(phone=serializer.validated_data['client_number'], offer_webmaster=offer_webmaster).exists():
-
-                processing_status = 'duplicate'
-                lead_status = 'cancelled'
-
             description = serializer.validated_data.get('description', '')
             description_extra = ", ".join(filter(None, [serializer.validated_data.get(f'q{i}') for i in range(1, 6)]))
             LeadWall.objects.create(

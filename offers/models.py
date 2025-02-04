@@ -234,10 +234,10 @@ class LeadWall(models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        #if LeadWall.objects.filter(phone=self.phone).count()>1 and self.webmaster:
-        #   self.processing_status = 'duplicate'
-        #    self.status = 'cancelled'
-        if LeadWall.objects.filter(phone=self.phone).exists():
+        for i in LeadWall.objects.filter(phone=self.phone).exclude(id=self.id):
+            if i.offer_webmaster.phone != self.offer_webmaster.phone: 
+                continue
+        # if LeadWall.objects.filter(phone=self.phone).exclude(id=self.id).exclude(offer_webmaster=self.offer_webmaster).exists():
             self.processing_status = 'duplicate'
             self.status = 'cancelled'
         super().save(*args, **kwargs)
