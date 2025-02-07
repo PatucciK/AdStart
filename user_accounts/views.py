@@ -59,8 +59,7 @@ def register(request):
             except EmailConfirmation.DoesNotExist:
                 EmailConfirmation.objects.create(email=email, confirmation_code=confirmation_code)
             # Отправка кода на почту
-            # send_verification_email_async(email, confirmation_code)
-            print(confirmation_code)
+            send_verification_email_async(email, confirmation_code)
             request.session['email'] = email
             return redirect('email_confirmation')
     else:

@@ -1,14 +1,14 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <!-- <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon"> -->
+    <link rel="icon" href="/media/admin-interface/favicon/Logotype_Favicon_reverse.png" type="image/x-icon">
     <title>{% block title %}AdStart{% endblock %}</title>
 
     <style>
@@ -17,37 +17,35 @@
             padding: 10px;
             font-size: 1rem;
         }
+
         .custom-btn:hover {
             opacity: 0.9;
         }
+
         .small-card {
             font-size: 0.85rem;
             line-height: 1.2;
         }
+
         .card-header {
             padding: 0.5rem 0.75rem;
         }
+
         .card-body {
             padding: 0.5rem 0.75rem;
         }
+
         .sidebar {
-            position: fixed;
-            top: 80px; /* Adjust based on the height of your navbar */
-            left: 0;
             width: 200px;
-            height: 100%;
-            padding: 20px;
+            padding: 12px 20px;
             background-color: #f8f9fa;
             border-right: 1px solid #ddd;
         }
-        .content {
-            margin-left: 220px; /* Adjust based on the width of your sidebar */
-            padding: 10px;
-            overflow: scroll;
-        }
+
     </style>
 </head>
-<body>
+
+<body style="height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column;">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">
             <img src="/media/admin-interface/logo/Logotype.png" alt="Logo" width="80px">
@@ -55,42 +53,47 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Выход</a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Выход</a>
+                </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Вход</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+                </li>
                 {% endif %}
             </ul>
         </div>
     </nav>
+    <div style="display: flex; height: 100%;">
 
-    <div class="sidebar">
-        {% load custom_tags %}
-        {% load_menu %}
-    </div>
+        <div class="sidebar">
+            {% load custom_tags %}
+            {% load_menu %}
+        </div>
 
-    {% block page_title %}
+        <div style="height: 100%; width: 100%; overflow: scroll;">
+            <div id="page-title">
+                {% block page_title %}{% endblock %}
+            </div>
 
-    {% endblock %}
-
-    <div class="content">
-        {% block content %}{% endblock %}
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script> -->
 </body>
+
 </html>
 <!-- Add this CSS to your base.html or a dedicated CSS file -->
 <style>
@@ -137,15 +140,18 @@
         font-size: 1.25rem;
         font-weight: 500;
     }
+
     .form-group {
-    margin-bottom: 15px;
+        margin-bottom: 15px;
     }
 
     .form-group label {
         font-weight: bold;
     }
 
-    .form-group input, .form-group select, .form-group textarea {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
         width: 100%;
         padding: 10px;
         border: 1px solid #ced4da;
@@ -164,6 +170,7 @@
     .btn-primary {
         background-color: #4e73df;
         border-color: #4e73df;
+        >a {color: white;}
     }
 
     .btn-primary:hover {
@@ -180,5 +187,4 @@
         background-color: #6c757d;
         border-color: #6c757d;
     }
-
 </style>

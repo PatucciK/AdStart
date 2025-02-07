@@ -20,6 +20,14 @@ class CallBeginAPIView(APIView):
         
             description = serializer.validated_data.get('description', '')
             description_extra = ", ".join(filter(None, [serializer.validated_data.get(f'q{i}') for i in range(1, 6)]))
+
+            for i in LeadWall.objects.filter(phone=self.phone).exclude(id=self.id):
+                if i.offer_webmaster.phone != self.offer_webmaster.phone: 
+                    continue
+            # if LeadWall.objects.filter(phone=self.phone).exclude(id=self.id).exclude(offer_webmaster=self.offer_webmaster).exists():
+                self.processing_status = 'duplicate'
+                self.status = 'cancelled'
+
             LeadWall.objects.create(
                 offer_webmaster=offer_webmaster, # через таблицу
                 name="Call",

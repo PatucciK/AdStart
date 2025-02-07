@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'finance',
     'sites',
     'ats',
-    'postbacks',
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -143,20 +142,12 @@ WSGI_APPLICATION = 'AdStart.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ad_start',  # Имя базы данных
-        'USER': 'ad_start_admin',      # Имя пользователя
-        'PASSWORD': '35IsS_8Ro4pMSUctH',  # Пароль
-        'HOST': '212.67.14.251',    # Локальный сервер
-        'PORT': '5432',         # Порт PostgreSQL (по умолчанию 5432)
+        'NAME': os.environ.get("DATABASE_DBNAME"),  # Имя базы данных
+        'USER': os.environ.get("DATABASE_USER"),      # Имя пользователя
+        'PASSWORD': os.environ.get("DATABASE_PASSWORD"),  # Пароль
+        'HOST': os.environ.get("DATABASE_URL"),    # Локальный сервер
+        'PORT': os.environ.get("DATABASE_PORT"),         # Порт PostgreSQL
     }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': os.environ.get("DATABASE_DBNAME"),  # Имя базы данных
-    #     'USER': os.environ.get("DATABASE_USER"),      # Имя пользователя
-    #     'PASSWORD': os.environ.get("DATABASE_PASSWORD"),  # Пароль
-    #     'HOST': os.environ.get("DATABASE_URL"),    # Локальный сервер
-    #     'PORT': os.environ.get("DATABASE_PORT"),         # Порт PostgreSQL
-    # }
 }
 
 

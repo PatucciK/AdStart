@@ -8,6 +8,7 @@
 
 
 {% block content %}
+{% include '../column_filter.html' %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         <form method="get" class="mb-4">
@@ -61,14 +62,14 @@
         <table class="table table-striped table-hover table-sm" style="font-size: 0.875em;">
             <thead class="thead-dark">
                 <tr>
-                    <th>Домен</th>
-                    <th>IP (геопозиция)</th>
+                    <th class="table-domain">Домен</th>
+                    <th class="table-ip_goe" scope="col" >IP (геопозиция)</th>
                     <th>Дата клика</th>
-                    <th>Sub 1</th>
-                    <th>Sub 2</th>
-                    <th>Sub 3</th>
-                    <th>Sub 4</th>
-                    <th>Sub 5</th>
+                    <th class="table-sub_1" scope="col" >Sub 1</th>
+                                        <th class="table-sub_2" scope="col" >Sub 2</th>
+                    <th class="table-sub_3" scope="col" >Sub 3</th>
+                    <th class="table-sub_4" scope="col" >Sub 4</th>
+                    <th class="table-sub_5" scope="col" >Sub 5</th>
                     <th>Данные о клиенте</th>
                 </tr>
             </thead>

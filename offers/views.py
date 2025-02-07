@@ -110,7 +110,6 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
 
 
     def get_queryset(self):
-        print(self.kwargs['pk'])
         offer = Offer.objects.filter(id=self.kwargs['pk'])
         return offer
 
@@ -141,8 +140,6 @@ class OfferDetailView(LoginRequiredMixin, DetailView):
         context['category_site'] = category_site        
 
         context['sites'] = SiteArchive.objects.filter(offer_id=self.kwargs['pk'])       
-        print()
-
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1088,7 +1085,6 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         advertiser = get_object_or_404(Advertiser, user=request.user)
         offers = Offer.objects.filter(partner_card__advertiser=advertiser)
-        print(offers)
         offer_web = OfferWebmaster.objects.filter(offer__partner_card__advertiser=advertiser)
 
         # Получение фильтров из запроса

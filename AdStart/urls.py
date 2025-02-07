@@ -80,9 +80,6 @@ urlpatterns = [
 
     # ATS API
     path('api/ats/notify_on_call/', CallBeginAPIView.as_view(), name='notify_on_call'),
-
-    # Postbacks API
-    path('api/postbacks/', include('postbacks.urls')),
 ]
 
 # Add media URL serving in development

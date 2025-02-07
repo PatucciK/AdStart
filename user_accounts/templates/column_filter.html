@@ -1,0 +1,74 @@
+<div style="background-color: white; margin: 8px; padding: 4px; width: max-content;">
+    <div id="column-select">Колонки</div>
+    <div id="column-select-content" class="hidden"
+        style="background-color: white;position: absolute; border-radius: 4px;border: 1px rgb(185, 185, 185) solid; padding: 4px; width: max-content;">
+    </div>
+    <script>
+        let first = true;
+        document.getElementById('column-select').addEventListener('click', () => {
+            if (!first) return;
+            first = false;
+            const columns = {
+                id: "id",
+                name: "Имя",
+                phone: "Телефон",
+                ip_goe: "IP",
+                description: "Описания",
+                additional: "Дополнительно",
+                state: "Состояние",
+                status: "Статус",
+                offer: "Оффер",
+                sub_1: "sub_1",
+                sub_2: "sub_2",
+                sub_3: "sub_3",
+                sub_4: "sub_4",
+                sub_5: "sub_5",
+                created: "Дата создания",
+                changed: "Дата изменеия",
+                comment: "Комментарии",
+
+                logo: "Логотип",
+                company: "Компания",
+                price_per_lead: "Цена за лид",
+                price_per_offer: "Цена за оффер",
+                geo: "Гео",
+                action: "Действие"
+            };
+
+            for (const [key, value] of Object.entries(columns)) {
+                if (document.getElementsByClassName(`table-${key}`).length === 0) continue;
+                const option = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = "checkbox"
+                checkbox.checked = true;
+                checkbox.addEventListener('click', (e) => {
+                    const list = document.getElementsByClassName(`table-${key}`);
+                    for (var j = 0; j < list.length; ++j) {
+                        list[j].classList.toggle("hidden")
+                    }
+                })
+                const label = document.createElement('label');
+                label.textContent = value
+                option.appendChild(checkbox);
+                option.appendChild(label);
+                parent.appendChild(option);
+            }
+
+        });
+        const parent = document.getElementById('column-select-content')
+        document.getElementById("column-select").addEventListener('click', (e) => {
+            if (e.target.id === "column-select") {
+                parent.classList.toggle('hidden')
+            }
+        })
+    </script>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .column-select {
+            position: absolute;
+        }
+    </style>
+</div>

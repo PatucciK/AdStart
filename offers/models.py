@@ -65,8 +65,6 @@ class Offer(models.Model):
     def save(self, *args, **kwargs):
         if self.contract_number == 'AUTO_GENERATE':
             self.contract_number = self.generate_contract_number()
-        
-            print(self.contract_number)
         super().save(*args, **kwargs)
 
     def generate_contract_number(self):
@@ -233,16 +231,6 @@ class LeadWall(models.Model):
             return False
         return True
 
-    def save(self, *args, **kwargs):
-        for i in LeadWall.objects.filter(phone=self.phone).exclude(id=self.id):
-            if i.offer_webmaster.phone != self.offer_webmaster.phone: 
-                continue
-        # if LeadWall.objects.filter(phone=self.phone).exclude(id=self.id).exclude(offer_webmaster=self.offer_webmaster).exists():
-            self.processing_status = 'duplicate'
-            self.status = 'cancelled'
-        super().save(*args, **kwargs)
-
-
     class Meta:
         verbose_name = 'Лидвол'
         verbose_name_plural = 'Лидволы'
@@ -300,3 +288,7 @@ class ChangeRequest(models.Model):
     class Meta:
         verbose_name = 'Запрос на изменение лида'
         verbose_name_plural = 'Запрос на изменение'
+
+class ExternalLeadwallMapping(models.Model):
+    external_id = models.CharField(null=False, blank=False)
+    local_id=models.ForeignKey(LeadWall,on_delete=models.CASCADE, null=False, blank=False)

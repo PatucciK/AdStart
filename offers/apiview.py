@@ -7,7 +7,7 @@ from rest_framework.throttling import AnonRateThrottle
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from .models import LeadWall, Offer
+from .models import LeadWall, Offer, OfferWebmaster, ExternalLeadwallMapping
 from .serializers import LeadWallSerializer, LeadUpdateSerializer, LeadSerializer, OfferUpdateSerializer, \
     OfferCreateSerializer, OfferSerializer, ClickSerializer, OfferDeleteSerializer
 
@@ -272,7 +272,26 @@ class ClickAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class OfferCreatePostbackAPIView(APIView):
+    def generate_external_id(self):
+        return f""
 
     def get(self, request):
-        print(request.GET)
-        return Response({"detail": "Оффер успешно создан."}, status=status.HTTP_200_OK)
+        offer_webmaster = OfferWebmaster.objects.get(phone=request.GET['partner_phone'])
+        if offer_webmaster is None: return Response({"detail": "Не удалось найти такой номер."}, status=status. HTTP_404_NOT_FOUND)
+        if LeadWallSerializer(data=request.GET).is_valid():
+            LeadWall.objects.create(
+                offer_webmaster = offer_webmaster,
+                name = "Postback",
+                phone = request.GET.get('phone'),
+                description = '',
+                description_extra = '',
+                sub_1 = request.GET.get('sub_1'),
+                sub_2 = request.GET.get('sub_2'),
+                sub_3 = request.GET.get('sub_3'),
+                sub_4 = request.GET.get('sub_4'),
+                sub_5 = "",
+                processing_status = '',
+                status = request.GET.get('status')
+            ).save()
+            return Response({"detail": "Оффер успешно создан."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Не удалось создать оффер."}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)

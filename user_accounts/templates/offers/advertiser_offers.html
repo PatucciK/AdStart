@@ -7,24 +7,25 @@
 
 
 {% block content %}
+{% include '../column_filter.html' %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         <table class="table table-striped table-hover table-sm">
             <thead class="thead-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Описание услуг</th>
-                    <th>Цена за лид</th>
+                    <th class="table-id" scope="col" >ID</th>
+                    <th class="table-name">Название</th>
+                    <th class="table-description">Описание услуг</th>
+                    <th class="table-price_per_lead">Цена за лид</th>
 
                     {% if user.is_superuser %}
-                        <th>Цена за оффер</th>
+                        <th class="table-price_per_offer">Цена за оффер</th>
                     {% endif%}
 
-                    <th>Статус оффера</th>
-                    <th>Валидность</th>
-                    <th>Актуальность</th>
-                    <th>Действия</th>
+                    <th class="table-status">Статус оффера</th>
+                    <th class="table-valid">Валидность</th>
+                    <th class="table-actual">Актуальность</th>
+                    <th class="table-action">Действия</th>
                 </tr>
             </thead>
             <tbody>

@@ -1,9 +1,25 @@
 from rest_framework import serializers
 from .models import Offer, LeadWall, OfferWebmaster, Click
 
+LEAD_STATUS_CHOICES = [
+        ('paid', 'Оплачено'),
+        ('on_hold', 'В работе'),
+        ('cancelled', 'Отмена'),
+    ]
 
+PROCESSING_STATUS_CHOICES = [
+        ('new', 'Новый лид'),
+        ('expired', 'Просрочено'),
+        ('no_response', 'Нет ответа'),
+        ('callback', 'Перезвонить'),
+        ('appointment', 'Запись на прием'),
+        ('visit', 'Визит'),
+        ('trash', 'Треш'),
+        ('duplicate', 'Дубль'),
+        ('rejected', 'Отклонено'),
+    ]
 class LeadWallSerializer(serializers.Serializer):
-    unique_token = serializers.UUIDField(required=True, help_text="Уникальный токен оффера для идентификации")
+    unique_token = serializers.UUIDField(required=False, help_text="Уникальный токен оффера для идентификации") # required=True
     name = serializers.CharField(max_length=255, required=False, help_text="Имя пользователя, отправляющего лид")
     phone = serializers.CharField(max_length=15, required=True,
                                   help_text="Номер телефона пользователя в формате +7XXXXXXXXXX или 8XXXXXXXXXX")

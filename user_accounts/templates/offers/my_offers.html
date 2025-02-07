@@ -9,6 +9,7 @@
 
 
 {% block content %}
+{% include '../column_filter.html' %}
 <!-- Подключение CSS для Choices.js -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 
@@ -41,63 +42,60 @@
             <table class="table table-striped table-hover table-sm">
             <thead class="thead-dark">
                 <tr>
-                    <th>ID</th>
-                    <th>Лого</th>
-                    <th>Компания</th>
-                    <th>Оффер</th>
-                    <th>Описание</th>
-                    <th>Цена за лид</th>
-                    <th>Гео</th>
-                    <th>Состояние</th>
-                    <th>Действие</th>
+                    <th class="table-id" scope="col" >ID</th>
+                    <th class="table-logo">Лого</th>
+                    <th class="table-company">Компания</th>
+                    <th class="table-offer" scope="col" >Оффер</th>
+                    <th class="table-description" scope="col" >Описание</th>
+                    <th class="table-price_per_lead">Цена за лид</th>
+                    <th class="table-geo">Гео</th>
+                    <th class="table-state" scope="col" >Состояние</th>
+                    <th class="table-action">Действие</th>
                 </tr>
             </thead>
-            <tbody>
-            <tr>
+            <tbody>                <tr>
+                <td class="table-id">
+                    <input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:60px">
+                </td>
+                <td class="table-logo"></td>
+                <td class="table-company">
+                    <select id="company_name" name="company_name[]" class="form-select form-select-sm" multiple>
+                        {% for company_id, company_name in companies %}
+                        <option value="{{ company_id }}" {% if company_id|stringformat:"s" in select_companies %}selected{% endif %}>{{ company_name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td class="table-offer"><input type="text" id="offer" name="offer" class="form-control form-control-sm" value="{{ request.GET.offer }}" placeholder="Offer"></td>
+                <td class="table-description"></td>
+                <td class="table-price_per_lead"></td>
+                <td class="table-geo"><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Geo"></td>
+                <td class="table-state">
+                    <select id="status" name="status" class="form-select form-select-sm">
+                        <option value="">Все статусы</option>
+                        {% for status, label in offers.model.STATUS_CHOICES %}
+                        <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td class="table-action">Действие</td>
+            </tr>
 
-                    <td>
-                        <input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:60px">
-
-                    </td>
-                    <td></td>
-                    <td>
-                        <select id="company_name" name="company_name[]" class="form-select form-select-sm" multiple>
-                            {% for company_id, company_name in companies %}
-                            <option value="{{ company_id }}" {% if company_id|stringformat:"s" in select_companies %}selected{% endif %}>{{ company_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td><input type="text" id="offer" name="offer" class="form-control form-control-sm" value="{{ request.GET.offer }}" placeholder="Offer"></td>
-                    <td></td>
-                    <td></td>
-                    <td><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Geo"></td>
-                    <td>
-                        <select id="status" name="status" class="form-select form-select-sm">
-                            <option value="">Все статусы</option>
-                            {% for status, label in offers.model.STATUS_CHOICES %}
-                            <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td></td>
-
-                </tr>
                 {% for offer in offers %}
                 <tr class="clickable-row" data-href="{% url 'offer_detail' offer.id %}" style="cursor: pointer">
-                    <td class="text-center">{{ offer.id }}</td>
-                    <td class="text-center">
+                    <td class="text-center table-id">{{ offer.id }}</td>
+                    <td class="text-center table-logo">
                         {% if offer.logo %}
                         <img src="{{ offer.logo.url }}" alt="{{ offer.name }}" width="50">
                         {% else %}
                         Нет логотипа
                         {% endif %}
                     </td>
-                    <td>{% get_partner_name offer.partner_card_id %}</td>
-                    <td>{{ offer.name }}</td>
-                    <td>{{ offer.service_description|truncatewords:20|striptags }}</td>
-                    <td>{{ offer.lead_price }} руб.</td>
-                    <td>{{ offer.geo }}</td>
-                    <td>
+                    <td class="table-company">{% get_partner_name offer.partner_card_id %}</td>
+                    <td class="table-offer">{{ offer.name }}</td>
+                    <td  class="table-description">{{ offer.service_description|truncatewords:20|striptags }}</td>
+                    <td class="table-price_per_lead">{{ offer.lead_price }} руб.</td>
+                    <td class="table-geo">{{ offer.geo }}</td>
+                    <td  class="table-state">
                         {% for el, stat in offer.STATUS_CHOICES %}
                             {% if el == offer.status %}
                                 {{ stat }}

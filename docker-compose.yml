@@ -29,6 +29,7 @@ services:
     build: .
     image: django:latest
     container_name: "django"
+    env_file: ".env.prod"
     command: gunicorn AdStart.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/app
