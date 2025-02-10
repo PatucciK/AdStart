@@ -31,19 +31,17 @@
             <tbody>
                 {% for offer in offers %}
                 <tr>
-                    <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.id }}</a></td>
-                    <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.name }}</a></td>
-                    <td><a href="{% url 'offer_detail' offer.id %}">{{ offer.service_description|truncatewords:20|striptags }}</a></td>
-
-
+                    <td class="table-id"><a href="{% url 'offer_detail' offer.id %}">{{ offer.id }}</a></td>
+                    <td class="table-name"><a href="{% url 'offer_detail' offer.id %}">{{ offer.name }}</a></td>
+                    <td class="table-description"><a href="{% url 'offer_detail' offer.id %}">{{ offer.service_description|truncatewords:20|striptags }}</a></td>
+                    <td class="table-price_per_lead">{{ offer.lead_price }} руб.</td>
                     {% if user.is_superuser %}
-                    <td>{{ offer.lead_price }} руб.</td>
+                    <td class="table-price_per_offer">{{ offer.offer_price }} руб.</td>
                     {% endif %}
-                    <td>{{ offer.offer_price }} руб.</td>
-                    <td>{{ offer.get_public_status_display }}</td>
-                    <td>{{ offer.validation_data_lead }}</td>
-                    <td>{{ offer.get_status_display }}</td>
-                    <td>
+                    <td class="table-status">{{ offer.get_public_status_display }}</td>
+                    <td class="table-valid">{{ offer.validation_data_lead }}</td>
+                    <td class="table-actual">{{ offer.get_status_display }}</td>
+                    <td class="table-action">
                         <div class="btn-group" role="group">
                             {% if offer.status == 'registered' %}
                             <form method="post" action="{% url 'pause_offer' offer.id %}" style="display:inline;">

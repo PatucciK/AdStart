@@ -77,7 +77,7 @@
                     </tr>
 
                     {% for lead in page_obj %}
-                    <tr class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
+                    <tr data-lead-id="{{lead.id}}" class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
                         <td>{{ lead.domain }}</td>
                         <td>{{ lead.id }}</td>
                         <td>{{ lead.name }}</td>
@@ -200,6 +200,20 @@
                 .then(data => {
                     if (data.success) {
                         alert('Статус обработки успешно обновлён');
+                        const selectRow = document.querySelector(`tr[data-lead-id="${leadId}"]`);
+                        const states = ["table-warning", "table-danger", "table-success", 'table-secondary'];
+                        selectRow.classList = [] 
+    
+                        if (newProcessingStatus === 'new') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'expired') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'no_response') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'callback') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'appointment') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'visit') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'trash') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'duplicate') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'rejected') selectRow.classList.add("table-warning")
+                        
                         location.reload(); // Перезагрузить страницу после успешного обновления
                     } else {
                         alert('Ошибка при обновлении статуса обработки: ' + data.message);

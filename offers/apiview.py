@@ -272,8 +272,6 @@ class ClickAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class OfferCreatePostbackAPIView(APIView):
-    def generate_external_id(self):
-        return f""
 
     def get(self, request):
         offer_webmaster = OfferWebmaster.objects.get(phone=request.GET['partner_phone'])
@@ -289,7 +287,7 @@ class OfferCreatePostbackAPIView(APIView):
                 sub_2 = request.GET.get('sub_2'),
                 sub_3 = request.GET.get('sub_3'),
                 sub_4 = request.GET.get('sub_4'),
-                sub_5 = "",
+                sub_5 = request.GET.get('sub_4'),
                 processing_status = '',
                 status = request.GET.get('status')
             ).save()

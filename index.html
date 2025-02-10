@@ -1,0 +1,34 @@
+<html>
+    <body>
+        <script>
+
+            function createLead() {
+                var phone = '9814571000'; // номер клиента, обязательно
+                var comment = ''; // комментарий, не обязательно
+                var apiToken = 'af043147bc8946cecec0b541c'; // токен со страницы Профиль, обязательно
+                var createLeadUrl = new URL('https://firstlead.ru/api/leads/create/form/' + apiToken);
+                createLeadUrl.searchParams.append('phone', phone);
+                createLeadUrl.searchParams.append('comment', comment);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", createLeadUrl, true);
+                xhr.send();
+            }
+            function send(){
+                const phoneField = "92939324"
+                console.log('phoneField: ', phoneField);
+                const comment = "234234"
+                console.log('comment: ', comment);
+                const apiToken = '37d1cd1e2f6e1020926cf10eb843a557c4d4eb3bc624cc422e232a5957b100d619259e361005d2ce';
+                const createLeadUrl = new URL('https://firstlead.ru/api/leads/create/form/' + apiToken);
+                createLeadUrl.searchParams.append('phone', phoneField);
+                createLeadUrl.searchParams.append('comment', comment);
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", createLeadUrl, true);
+                xhr.send();
+            }
+            send()
+            createLead();
+            
+            </script>
+    </body>
+</html>

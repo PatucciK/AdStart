@@ -16,7 +16,6 @@
                 <table class="table table-striped table-hover table-sm" style="font-size: 0.85rem;">
                     <thead class="thead-dark">
                     <tr>
-                        <th>№</th>
                         <th class="table-id" scope="col" >ID</th>
                         <th class="table-name" scope="col" >Имя</th>
                         <th class="table-phone" scope="col" >Телефон</th>
@@ -35,14 +34,13 @@
                 <tbody>
                     {% csrf_token %}
                     <tr>
-                            <td></td>
-                            <td><input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:40px"></td>
-                            <td><input type="text" id="name" name="name" class="form-control form-control-sm" value="{{ request.GET.name }}" placeholder="Имя" style="width:60px"></td>
-                            <td><input type="text" id="phone_number" name="phone_number" class="form-control form-control-sm" value="{{ request.GET.phone_number }}" placeholder="Телефон"></td>
-                            <td><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Геопозиция"></td>
-                            <td></td>
-                            <td></td>
-                            <td>
+                            <td  class="table-id"><input type="text" id="id" name="id" class="form-control form-control-sm" value="{{ request.GET.id }}" placeholder="Id" style="width:40px"></td>
+                            <td  class="table-name"><input type="text" id="name" name="name" class="form-control form-control-sm" value="{{ request.GET.name }}" placeholder="Имя" style="width:60px"></td>
+                            <td  class="table-phone"><input type="text" id="phone_number" name="phone_number" class="form-control form-control-sm" value="{{ request.GET.phone_number }}" placeholder="Телефон"></td>
+                            <td  class="table-ip_goe"><input type="text" id="geo" name="geo" class="form-control form-control-sm" value="{{ request.GET.geo }}" placeholder="Геопозиция"></td>
+                            <td  class="table-description"></td>
+                            <td  class="table-additional"></td>
+                            <td  class="table-status">
                                 <select id="precessing_status" name="precessing_status" class="form-select form-select-sm">
                                     <option value="">Все статусы</option>
                                     {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
@@ -50,7 +48,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td>
+                            <td  class="table-state">
                                 <select id="lead_status" name="lead_status" class="form-select form-select-sm">
                                     <option value="">Все статусы</option>
                                     {% for status, label in leads.model.LEAD_STATUS_CHOICES %}
@@ -58,7 +56,7 @@
                                     {% endfor %}
                                 </select>
                             </td>
-                            <td>
+                            <td  class="table-offer">
                                 <select id="offer_id" name="offer_id" class="form-select form-select-sm">
                                     <option value="">Все офферы</option>
                                     {% for offer in offers %}
@@ -67,25 +65,24 @@
                             </select>
                             </td>
 
-                            <td>
+                            <td class="table-created"> 
                                 <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.GET.start_date }}">
                             </td>
-                            <td>
+                            <td  class="table-changed">
                                 <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.GET.end_date }}">
                             </td>
-                            <td></td>
+                            <td class="table-comment"></td>
                     </tr>
 
                     {% for lead in page_obj %}
-                    <tr class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
-                        <td>{{ loop.index }}</td>
-                        <td>{{ lead.id }}</td>
-                        <td>{{ lead.name }}</td>
-                        <td>{{ lead.phone }}</td>
-                        <td>{{ lead.ip_adress }} {% if lead.ip_adress %}({{ lead.ip_adress|get_geolocation }}){% endif %}</td>
-                        <td>{{ lead.description|truncatewords:10 }}</td>
-                        <td>{{ lead.description_extra|truncatewords:10 }}</td>
-                        <td>
+                    <tr data-lead-id="{{lead.id}}" class="{% if lead.status == 'on_hold' and lead.processing_status != 'new' %}table-warning{% elif lead.status == 'cancelled' %}table-danger{% elif lead.status == 'paid' %}table-success{% else %}table-secondary{% endif %}">
+                        <td  class="table-id">{{ lead.id }}</td>
+                        <td  class="table-name">{{ lead.name }}</td>
+                        <td  class="table-phone">{{ lead.phone }}</td>
+                        <td  class="table-ip_goe">{{ lead.ip_adress }} {% if lead.ip_adress %}({{ lead.ip_adress|get_geolocation }}){% endif %}</td>
+                        <td  class="table-description">{{ lead.description|truncatewords:10 }}</td>
+                        <td  class="table-additional">{{ lead.description_extra|truncatewords:10 }}</td>
+                        <td  class="table-status">
 
                             <select class="form-select form-select-sm lead-processing-status exclude-class" data-lead-id="{{ lead.id }}">
                                 {% for status, label in leads.model.PROCESSING_STATUS_CHOICES %}
@@ -101,18 +98,18 @@
                             </button>
 
                         </td>
-                        <td>{{ lead.get_status_display }}</td>
+                        <td  class="table-state">{{ lead.get_status_display }}</td>
 
-                        <td>
+                        <td  class="table-offer">
                             <a href="{% url 'offer_detail' lead.offer_webmaster.offer.id %}">
                                 {{ lead.offer_webmaster.offer.name }}
 
                             </a>
 
                         </td>
-                        <td>{{ lead.created_at|date:"d.m.Y" }}</td>
-                        <td>{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
-                        <td>
+                        <td class="table-created">{{ lead.created_at|date:"d.m.Y" }}</td>
+                        <td  class="table-changed">{{ lead.update_at|date:"d.m.Y H:i:s" }}</td>
+                        <td class="table-comment">
                             {% with latest_comment=lead.comments.last %}
                             <div>
                                 <strong>{{ latest_comment.user.username }}:</strong> {{ latest_comment.text }} <em>({{ latest_comment.created_at|date:"d.m.Y H:i:s" }})</em>
@@ -201,7 +198,21 @@
                 .then(data => {
                     if (data.success) {
                         alert('Статус обработки успешно обновлён');
-                        location.reload(); // Перезагрузить страницу после успешного обновления
+                        const selectRow = document.querySelector(`tr[data-lead-id="${leadId}"]`);
+                        const states = ["table-warning", "table-danger", "table-success", 'table-secondary'];
+                        selectRow.classList = [] 
+    
+                        if (newProcessingStatus === 'new') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'expired') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'no_response') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'callback') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'appointment') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'visit') selectRow.classList.add("table-success")
+                        if (newProcessingStatus === 'trash') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'duplicate') selectRow.classList.add("table-warning")
+                        if (newProcessingStatus === 'rejected') selectRow.classList.add("table-warning")
+                        
+                        // location.reload(); // Перезагрузить страницу после успешного обновления
                     } else {
                         alert('Ошибка при обновлении статуса обработки: ' + data.message);
                         console.log(data.message);

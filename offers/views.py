@@ -27,6 +27,7 @@ from user_accounts.models import Advertiser, Webmaster
 from datetime import date, datetime
 from django.db import models, transaction
 from django.db.models import F, Q
+import json
 
 from django.core.paginator import Paginator
 
@@ -988,7 +989,7 @@ class WebmasterOfferStatisticsView(LoginRequiredMixin, ListView):
                 stat['conversion_rate'] = (stat['unique_leads'] / total_clicks * 100) if total_clicks > 0 else 0
                 stat['epc'] = (stat['total_income'] / total_clicks) if total_clicks > 0 else 0
 
-        return offer_stats
+        return offer_stats[::-1]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1205,6 +1206,7 @@ class AdvertiserOfferStatisticsView(LoginRequiredMixin, View):
             'offers': offers,
             'offer_stats': offer_stats,
         }
+        print(context['offer_stats'])
         return render(request, self.template_name, context)
 
 

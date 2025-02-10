@@ -1,7 +1,7 @@
-<div style="background-color: white; margin: 8px; padding: 4px; width: max-content;">
-    <div id="column-select">Колонки</div>
+<div style="background-color: white; margin: 8px; width: max-content; border: 1px solid rgb(41, 41, 41); border-radius: 2px;">
+    <div id="column-select" style="text-align: center; width: 100%; padding: 0 2px;"> Фильтр колонок ⮞</div>
     <div id="column-select-content" class="hidden"
-        style="background-color: white;position: absolute; border-radius: 4px;border: 1px rgb(185, 185, 185) solid; padding: 4px; width: max-content;">
+        style="z-index: 10;background-color: white;position: absolute; border-radius: 4px;border: 1px solid rgb(41, 41, 41); padding: 4px; width: max-content;">
     </div>
     <script>
         let first = true;
@@ -13,7 +13,7 @@
                 name: "Имя",
                 phone: "Телефон",
                 ip_goe: "IP",
-                description: "Описания",
+                description: "Описание",
                 additional: "Дополнительно",
                 state: "Состояние",
                 status: "Статус",
@@ -26,13 +26,15 @@
                 created: "Дата создания",
                 changed: "Дата изменеия",
                 comment: "Комментарии",
-
+                domain: "Домен",
                 logo: "Логотип",
                 company: "Компания",
                 price_per_lead: "Цена за лид",
                 price_per_offer: "Цена за оффер",
                 geo: "Гео",
-                action: "Действие"
+                action: "Действие",
+                valid:"Валидность",
+                actual: "Актуальность"
             };
 
             for (const [key, value] of Object.entries(columns)) {
